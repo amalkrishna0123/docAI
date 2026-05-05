@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "../.git"
+		},
+		{
+			"path": "../.vs"
+		},
+		{
+			"path": "../authentication"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../insurance"
+		},
+		{
+			"path": "../media"
+		},
+		{
+			"path": "../medical_insurance"
+		},
+		{
+			"path": "../static"
+		}
+	]
+}

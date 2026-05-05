@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAE Document OCR Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning-bg: #fef3c7;
+            --warning-border: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .warning-banner {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .selector-group {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .selector-group label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        select {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: #f1f5f9;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .upload-zone.dragging {
+            border-color: var(--primary);
+            background: #dbeafe;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #results {
+            margin-top: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .field {
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .field .value {
+            font-weight: 500;
+            color: #0f172a;
+            word-break: break-all;
+        }
+
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--primary);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        pre {
+            background: #f1f5f9;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            color: #334155;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>UAE Document OCR Analyzer</h1>
+            <p class="subtitle">Extract data from government documents instantly via Google Document AI</p>
+        </header>
+
+        <div id="wrongPortBanner" class="warning-banner">
+            ⚠️ <strong>Wrong server detected!</strong> You are viewing this page from <strong
+                id="currentPort"></strong>.
+            Please open <a href="http://127.0.0.1:8000/test-labour/"
+                target="_blank">http://127.0.0.1:8000/test-labour/</a> instead
+            to avoid page reloads after upload.
+        </div>
+
+        <div class="card">
+            <div class="selector-group">
+                <label>AI-Powered Document Extraction</label>
+                <p style="color: var(--text-light); font-size: 0.875rem;">Upload any document (Passport, Emirates ID,
+                    Visa, or Labour Contract). The AI will automatically detect the type and extract data.</p>
+            </div>
+
+            <div id="dropzone" class="upload-zone">
+                <p id="zoneText" style="margin-bottom: 1rem; font-weight: 500;">Drag and drop your document here</p>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1.5rem;">or</p>
+                <input type="file" id="fileInput" class="hidden" accept="image/*,.pdf">
+                <button type="button" id="selectBtn" class="btn">
+                    <span>Select File</span>
+                </button>
+            </div>
+
+            <div id="loading" class="status hidden">
+                <span class="loader"></span>
+                <p style="margin-top: 0.5rem;">AI is analyzing your document...</p>
+            </div>
+
+            <div id="error" class="status hidden" style="color: #ef4444;"></div>
+        </div>
+
+        <div id="results" class="card hidden">
+            <h2 style="margin-bottom: 0.5rem; font-size: 1.25rem;">Extracted Information</h2>
+            <div id="detectedType" style="margin-bottom: 1.5rem; font-weight: 600; color: var(--primary);"></div>
+            <div class="grid" id="dataGrid"></div>
+        </div>
+
+        <div id="jsonView" class="card hidden">
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">AI Source JSON</h2>
+            <pre id="jsonRaw"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Detect wrong port (Live Server) and show banner
+        if (location.port === '5500' || location.port === '5501') {
+            document.getElementById('wrongPortBanner').style.display = 'block';
+            document.getElementById('currentPort').textContent = location.host;
+        }
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const selectBtn = document.getElementById('selectBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const dataGrid = document.getElementById('dataGrid');
+        const errorDiv = document.getElementById('error');
+        const detectedTypeDiv = document.getElementById('detectedType');
+
+        let isUploading = false;
+
+        // Button click → open file picker
+        selectBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!isUploading) fileInput.click();
+        });
+
+        // Drag & Drop
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragging');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragging');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragging');
+            const file = e.dataTransfer.files[0];
+            if (file && !isUploading) handleUpload(file);
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file || isUploading) return;
+            fileInput.value = '';
+            handleUpload(file);
+        });
+
+        async function handleUpload(file) {
+            if (isUploading) return;
+            isUploading = true;
+
+            // Reset UI state
+            errorDiv.classList.add('hidden');
+            results.classList.add('hidden');
+            document.getElementById('jsonView').classList.add('hidden');
+            loading.classList.remove('hidden');
+            dropzone.style.opacity = '0.5';
+            selectBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('document', file);
+
+            // const endpoint = `/api/upload-document/`;
+            const endpoint = "http://127.0.0.1:8000/api/upload-document/";
+            // const endpoint = "https://docai.keralahome.in/api/upload-document/";
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+
+                const result = await response.json();
+                console.log('--- AI API Response ---', result);
+
+                if (result.success) {
+                    detectedTypeDiv.textContent = `Document Type: ${result.document_type}`;
+                    displayResults(result.data);
+                    displayJSON(result);
+                } else {
+                    showError(result.error || 'AI Extraction Failed.');
+                }
+            } catch (err) {
+                console.error('Upload error:', err);
+                showError('Network error — make sure Django server is running.');
+            } finally {
+                loading.classList.add('hidden');
+                dropzone.style.opacity = '1';
+                selectBtn.disabled = false;
+                isUploading = false;
+            }
+        }
+
+        function displayJSON(data) {
+            document.getElementById('jsonRaw').textContent = JSON.stringify(data, null, 4);
+            document.getElementById('jsonView').classList.remove('hidden');
+        }
+
+        function displayResults(data) {
+            dataGrid.innerHTML = '';
+
+            const formatLabel = (key) =>
+                key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+            for (const [key, value] of Object.entries(data)) {
+                if (typeof value === 'object' && value !== null) continue;
+                const div = document.createElement('div');
+                div.className = 'field';
+                div.innerHTML = `
+                    <label>${formatLabel(key)}</label>
+                    <div class="value">${value || '<span style="color:#94a3b8">N/A</span>'}</div>
+                `;
+                dataGrid.appendChild(div);
+            }
+
+            results.classList.remove('hidden');
+            results.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showError(msg) {
+            errorDiv.textContent = msg;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function getCookie(name) {
+            let value = null;
+            if (document.cookie) {
+                for (const c of document.cookie.split(';')) {
+                    const t = c.trim();
+                    if (t.startsWith(name + '=')) {
+                        value = decodeURIComponent(t.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return value;
+        }
+    </script>
+</body>
+
+</html>

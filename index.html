@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Medical Insurance Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .modal-open {
+            overflow: hidden !important;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0B1120;
+            /* Deep Dark Blue Base */
+            color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            height: 100vh;
+            /* Fixed height for full app feel */
+        }
+
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        .fade-in-delayed {
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        .slide-up {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* PREMIUM ANIMATED BACKGROUND */
+        .ambient-light {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            background: #0B1120;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+
+        .orb-1 {
+            top: -10%;
+            left: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: #1D375F;
+            /* Secondary Blue */
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 70vw;
+            height: 70vw;
+            background: #B99A4F;
+            /* Primary Gold */
+            opacity: 0.2;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            top: 40%;
+            left: 40%;
+            width: 40vw;
+            height: 40vw;
+            background: #1D375F;
+            opacity: 0.3;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(30px, 50px) scale(1.1);
+            }
+        }
+
+        /* Chat Bubbles */
+        .chat-bubble {
+            max-width: 90%;
+            width: fit-content;
+            padding: 14px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (min-width: 768px) {
+            .chat-bubble {
+                max-width: 60%;
+            }
+        }
+
+        .chat-user {
+            background: linear-gradient(135deg, #B99A4F 0%, #8A7137 100%);
+            /* Gold Gradient */
+            color: white;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+            margin-left: auto;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-bot {
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        /* SEAMLESS HEADER */
+        .seamless-header {
+            /* No border, subtle gradient fade only */
+            background: linear-gradient(to bottom, rgba(11, 17, 32, 0.8) 0%, rgba(11, 17, 32, 0) 100%);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Input Container Gradient Mask */
+        .input-container-glass {
+            background: linear-gradient(to top, rgba(11, 17, 32, 1) 20%, rgba(11, 17, 32, 0.8) 80%, rgba(11, 17, 32, 0) 100%);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Typing Indicator */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+            height: 6px;
+            width: 6px;
+            background-color: #94a3b8;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Gold Button Class */
+        .btn-gold {
+            background: linear-gradient(135deg, #B99A4F 0%, #967d40 100%);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px -3px rgba(185, 154, 79, 0.4);
+        }
+
+        .btn-gold:active {
+            transform: scale(0.98);
+        }
+
+        .btn-gold:hover {
+            filter: brightness(1.1);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#FDFBF6',
+                            100: '#F7F3E6',
+                            200: '#EBE2C8',
+                            300: '#DFD0AA',
+                            400: '#D3BE8C',
+                            500: '#B99A4F', // Primary Gold
+                            600: '#A68842',
+                            700: '#8A7137',
+                            900: '#1D375F',
+                        },
+                        secondary: {
+                            DEFAULT: '#1D375F', // Secondary Blue
+                            light: '#2a4d82',
+                            dark: '#0B1120'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0, 0, 0, 0.2)',
+                        'glow': '0 0 30px rgba(185, 154, 79, 0.4)'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="h-screen w-full flex flex-col overflow-hidden">
+
+    <div class="ambient-light">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <header id="header"
+        class="fixed top-0 left-0 right-0 h-20 seamless-header z-50 flex items-center justify-between px-6 md:px-12 transition-all duration-300">
+        <div class="flex items-center gap-4">
+            <button onclick="goBack()" id="backBtn"
+                class="hidden p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors text-slate-200">
+                <i data-lucide="arrow-left" class="w-5 h-5 md:w-6 md:h-6"></i>
+            </button>
+            <div class="flex flex-col">
+                <span id="pageTitle"
+                    class="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-brand-500">Dashboard</span>
+                <h1 class="text-sm md:text-lg font-bold text-white hidden md:block">Medical Insurance Portal</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex flex-col items-end mr-2">
+                <span id="header-username" class="text-xs font-bold text-white">Guest</span>
+                <span class="text-[10px] text-brand-300">Verified Member</span>
+            </div>
+            <button onclick="clearChatSession()"
+                class="hidden md:flex items-center gap-2 p-2 px-3 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all border border-slate-700/50 mr-2 text-xs font-bold uppercase tracking-wider title='Restart Chat'">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Clear
+            </button>
+            <div
+                class="w-10 h-10 rounded-full border-2 border-brand-500 p-[2px] shadow-lg shadow-brand-500/20 cursor-pointer hover:scale-105 transition-transform bg-slate-900/50">
+                <div id="header-initials"
+                    class="w-full h-full rounded-full bg-transparent flex items-center justify-center text-brand-400 text-xs font-bold">
+                    G</div>
+            </div>
+            <button onclick="logout()"
+                class="ml-2 p-2 rounded-full bg-white/10 text-white hover:bg-red-500 hover:text-white transition-all border border-white/10"
+                title="Logout">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full max-w-[1920px] mx-auto pt-20 relative overflow-y-auto no-scrollbar">
+
+        <section id="view-login" class="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center p-6 fade-in">
+            <div
+                class="w-full max-w-md bg-white/95 backdrop-blur-sm p-8 md:p-12 rounded-[32px] shadow-2xl border border-white/20">
+                <div class="text-center mb-10">
+                    <div
+                        class="w-20 h-20 bg-gradient-to-br from-brand-500 to-brand-600 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-glow transform rotate-3 hover:rotate-6 transition-transform duration-500">
+                        <i data-lucide="shield-check" class="w-10 h-10 text-white fill-white/20"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Welcome Back</h2>
+                    <p class="text-xs uppercase tracking-widest text-slate-400 mt-3 font-semibold">Secure Access Portal
+                    </p>
+                </div>
+
+                <div id="login-step-1" class="space-y-5">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Email
+                            Address</label>
+                        <div class="relative group">
+                            <i data-lucide="mail"
+                                class="absolute left-4 top-4 w-5 h-5 text-slate-400 group-focus-within:text-brand-500 transition-colors"></i>
+                            <input type="email" id="emailInput"
+                                class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-800"
+                                placeholder="name@company.com">
+                        </div>
+                    </div>
+                    <button onclick="sendOTP()"
+                        class="w-full btn-gold font-semibold py-4 rounded-2xl text-sm transition-all shadow-lg">
+                        Continue Securely
+                    </button>
+                </div>
+
+                <div id="login-step-2" class="hidden space-y-8">
+                    <div
+                        class="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-2xl text-xs font-medium text-center border border-emerald-100 flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> OTP sent to your email
+                    </div>
+
+                    <div class="space-y-3 text-center">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Enter Access
+                            Code</label>
+                        <input type="text" id="otpInput" maxlength="4"
+                            class="w-full text-center tracking-[1em] py-4 bg-transparent border-b-2 border-slate-200 text-3xl font-bold text-slate-800 focus:outline-none focus:border-brand-500 transition-colors placeholder:text-slate-200 placeholder:tracking-normal"
+                            placeholder="••••">
+                    </div>
+
+                    <button onclick="verifyOTP()"
+                        class="w-full btn-gold font-semibold py-4 rounded-2xl text-sm transition-all shadow-lg">
+                        Verify & Login
+                    </button>
+                    <button onclick="resetLogin()"
+                        class="w-full text-slate-400 hover:text-slate-600 text-xs font-medium py-2 uppercase tracking-wide">Change
+                        Email</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-landing" class="hidden w-full max-w-7xl mx-auto p-6 md:p-10 lg:p-14 pb-32">
+            <div class="mb-12 mt-4 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Overview</h2>
+                <p class="text-xs font-semibold text-brand-400 uppercase tracking-widest mt-2">Manage your health &
+                    insurance</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 fade-in-delayed">
+                <div onclick="startInsuranceFlow()"
+                    class="lg:col-span-2 group relative bg-white p-8 md:p-10 rounded-[32px] shadow-soft hover:shadow-2xl hover:shadow-brand-500/20 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20">
+                    <div
+                        class="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full -mr-20 -mt-20 transition-transform group-hover:scale-110">
+                    </div>
+                    <div
+                        class="relative z-10 flex flex-col md:flex-row md:items-center justify-between h-full min-h-[160px]">
+                        <div class="mb-6 md:mb-0">
+                            <div
+                                class="w-14 h-14 bg-brand-500 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-200 text-white mb-6 group-hover:-translate-y-1 transition-transform">
+                                <i data-lucide="plus" class="w-7 h-7"></i>
+                            </div>
+                            <h3 class="font-bold text-2xl text-slate-900 leading-tight">Get Medical Insurance</h3>
+                            <p class="text-sm font-medium text-slate-400 mt-2 max-w-sm">Apply for a new policy in
+                                minutes using AI assistance.</p>
+                        </div>
+                        <div
+                            class="flex items-center gap-2 btn-gold font-bold text-sm px-6 py-3 rounded-full transition-colors">
+                            Start Application <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="showDetails()"
+                    class="bg-white p-8 rounded-[32px] shadow-soft border border-white/20 hover:border-brand-300 transition-all cursor-pointer hover:-translate-y-1">
+                    <div
+                        class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800">My Portfolio</h3>
+                    <p class="text-xs text-slate-400 mt-2 font-medium uppercase tracking-wide">View active policies</p>
+                </div>
+
+                <div onclick="openAskAI()"
+                    class="bg-white p-8 rounded-[32px] shadow-soft border border-white/20 hover:border-brand-300 transition-all cursor-pointer hover:-translate-y-1">
+                    <div
+                        class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6">
+                        <!-- <i data-lucide="sparkles" class="w-6 h-6"></i> -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path fill-rule="evenodd"
+                                d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.89l.813-2.846A.75.75 0 0 1 9 4.5ZM18 1.5a.75.75 0 0 1 .728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 0 1 0 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 0 1-1.456 0l-.258-1.036a2.625 2.625 0 0 0-1.91-1.91l-1.036-.258a.75.75 0 0 1 0-1.456l1.036-.258a2.625 2.625 0 0 0 1.91-1.91l.258-1.036A.75.75 0 0 1 18 1.5ZM16.5 15a.75.75 0 0 1 .712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 0 1 0 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 0 1-1.422 0l-.395-1.183a1.5 1.5 0 0 0-.948-.948l-1.183-.395a.75.75 0 0 1 0-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0 1 16.5 15Z"
+                                clip-rule="evenodd" />
+                        </svg>
+
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800">Ask AI</h3>
+                    <p class="text-xs text-slate-400 mt-2 font-medium uppercase tracking-wide">24/7 Support Assistant
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-12 fade-in-delayed">
+                <div
+                    class="bg-amber-500/10 border border-amber-500/20 backdrop-blur-md rounded-2xl p-6 flex gap-4 items-center max-w-3xl">
+                    <div class="bg-amber-500/20 p-2 rounded-full">
+                        <i data-lucide="info" class="w-5 h-5 text-amber-400"></i>
+                    </div>
+                    <p class="text-sm text-amber-100 font-medium">
+                        <strong>Policy Rule:</strong> Only one medical insurance policy can be active per Emirates ID at
+                        any given time.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-chat-interface" class="hidden flex flex-col bg-transparent relative"
+            style="height: calc(100vh - 80px);">
+            <div id="chat-stream"
+                class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full scroll-smooth no-scrollbar">
+            </div>
+
+            <div class="pt-6 pb-6 px-4 md:px-6 input-container-glass">
+                <div class="max-w-3xl mx-auto w-full">
+                    <div id="maf-progress-container" class="hidden mb-4 transition-all duration-500 fade-in">
+                        <div
+                            class="flex justify-between text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                            <span id="maf-progress-text">Question 1 of 9</span>
+                            <span id="maf-progress-percent">0%</span>
+                        </div>
+                        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                            <div id="maf-progress-bar"
+                                class="h-full bg-brand-500 transition-all duration-500 shadow-[0_0_10px_rgba(185,154,79,0.5)]"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div id="chat-options-container"
+                        class="hidden mb-4 flex flex-wrap gap-2 justify-center md:justify-start">
+                    </div>
+
+                    <div
+                        class="flex items-center gap-3 bg-white p-2 rounded-full border border-slate-200 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-500/20 transition-all shadow-lg">
+                        <button
+                            class="p-3 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                            <i data-lucide="mic" class="w-5 h-5"></i>
+                        </button>
+                        <input type="text" id="chatInput" placeholder="Type your response..."
+                            class="flex-1 bg-transparent text-sm md:text-base text-slate-800 placeholder:text-slate-400 focus:outline-none px-2">
+                        <button onclick="handleManualSend()"
+                            class="p-3 btn-gold rounded-full shadow-lg shadow-brand-500/40 active:scale-95 transition-transform">
+                            <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW ASK AI CHAT -->
+        <section id="view-ai-chat" class="hidden flex flex-col bg-transparent relative"
+            style="height: calc(100vh - 80px);">
+            <div id="ai-chat-stream"
+                class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full scroll-smooth no-scrollbar">
+            </div>
+
+            <div class="pt-6 pb-6 px-4 md:px-6 input-container-glass">
+                <div class="max-w-3xl mx-auto w-full">
+                    <div
+                        class="flex items-center gap-3 bg-white p-2 rounded-full border border-slate-200 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-500/10 transition-all shadow-lg">
+                        <input type="text" id="aiChatInput"
+                            class="flex-1 bg-transparent text-sm md:text-base text-slate-800 placeholder:text-slate-400 focus:outline-none px-6">
+                        <button onclick="handleAiManualSend()"
+                            class="p-3 btn-gold rounded-full shadow-lg shadow-brand-500/40 active:scale-95 transition-transform">
+                            <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-review"
+            class="hidden fixed inset-0 z-50 bg-secondary-dark/80 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden">
+            <div
+                class="bg-white w-full max-w-2xl max-h-[90vh] rounded-[32px] shadow-2xl relative overflow-hidden animate-slide-up flex flex-col border border-white/20">
+                <div class="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div>
+                        <h3 id="review-modal-subtitle"
+                            class="text-xs font-bold uppercase tracking-widest text-slate-500">Verification</h3>
+                        <h2 id="review-modal-title" class="text-xl font-bold text-slate-900">Review Details</h2>
+                    </div>
+                    <span id="review-modal-badge"
+                        class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wide border border-green-200">
+                        Extracted from ID
+                    </span>
+                </div>
+
+                <div class="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto" id="review-form">
+                </div>
+
+                <div
+                    class="p-6 md:p-8 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row gap-4 items-center">
+                    <div id="review-modal-notice"
+                        class="flex-1 text-xs text-orange-600 font-medium flex gap-2 items-center bg-orange-50 p-3 rounded-xl border border-orange-100 w-full md:w-auto">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 flex-none"></i>
+                        Verify details match Emirates ID to avoid rejection.
+                    </div>
+                    <button id="review-modal-cancel" onclick="cancelReview()"
+                        class="w-full md:w-auto px-8 py-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
+                        Close
+                    </button>
+                    <button id="review-modal-confirm" onclick="confirmReview()"
+                        class="w-full md:w-auto px-8 py-4 btn-gold rounded-xl font-bold text-sm shadow-xl">
+                        Confirm & Return to Chat
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW POLICY DETAILS MODAL -->
+        <section id="view-policy-details"
+            class="hidden fixed inset-0 z-50 bg-secondary-dark/80 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden">
+            <div
+                class="bg-white w-full max-w-2xl max-h-[90vh] rounded-[32px] shadow-2xl relative overflow-hidden animate-slide-up flex flex-col border border-white/20">
+                <div class="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500"
+                            id="policy-detail-subtitle">Policy Information</h3>
+                        <h2 class="text-xl font-bold text-slate-900" id="policy-detail-title">User Details</h2>
+                    </div>
+                    <button onclick="closePolicyDetails()"
+                        class="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-500"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto" id="policy-detail-container">
+                    <!-- Read-only fields injected here -->
+                </div>
+
+                <div class="p-6 md:p-8 border-t border-slate-100 bg-slate-50 flex justify-end">
+                    <button onclick="closePolicyDetails()"
+                        class="w-full md:w-auto px-8 py-4 bg-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-300 transition-all">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-details" class="hidden w-full max-w-5xl mx-auto p-6 md:p-10">
+            <div class="flex items-center justify-between mb-8 mt-4">
+                <h2 class="text-xs font-bold text-brand-300 uppercase tracking-widest">Active Policies</h2>
+            </div>
+
+            <div id="policies-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>
+
+            <div id="no-policies" class="hidden min-h-[50vh] flex flex-col items-center justify-center text-center">
+                <div
+                    class="w-20 h-20 bg-white/10 backdrop-blur rounded-[2rem] flex items-center justify-center mb-6 rotate-12 border border-white/10">
+                    <i data-lucide="file-minus" class="w-10 h-10 text-slate-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">No active insurance</h3>
+                <p class="text-sm text-slate-400 mt-2 max-w-xs mx-auto">You haven't purchased any medical insurance
+                    policies yet.</p>
+                <button onclick="startInsuranceFlow()"
+                    class="mt-8 px-8 py-4 btn-gold text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg">Get
+                    Started</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- GUIDELINES MODAL -->
+    <div id="modal-guidelines"
+        class="hidden fixed inset-0 z-[60] bg-secondary-dark/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-8 shadow-2xl relative overflow-hidden animate-slide-up">
+            <div class="absolute top-0 left-0 w-full h-2 bg-brand-500"></div>
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-900">Before We Start</h3>
+                <button onclick="closeGuidelines()"
+                    class="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-slate-500"></i>
+                </button>
+            </div>
+
+            <div
+                class="bg-blue-50 border border-blue-100 text-blue-900 text-sm p-6 rounded-2xl mb-6 leading-relaxed font-medium shadow-sm">
+                "Please complete the medical insurance process once you start it. Leaving midway will cancel the
+                application."
+            </div>
+
+            <div
+                class="flex items-center gap-4 text-xs font-semibold text-slate-500 mb-10 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div class="p-2 bg-white rounded-lg shadow-sm">
+                    <i data-lucide="credit-card" class="w-5 h-5 text-slate-400"></i>
+                </div>
+                Please have your Emirates ID ready for scanning.
+            </div>
+
+            <button onclick="closeGuidelines()"
+                class="w-full btn-gold text-white py-4 rounded-2xl text-sm font-bold shadow-lg">
+                I Understand, Let's Go
+            </button>
+        </div>
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="modal-alert"
+        class="hidden fixed inset-0 z-[100] bg-secondary-dark/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl relative overflow-hidden animate-slide-up">
+            <div id="alert-accent" class="absolute top-0 left-0 w-full h-2 bg-brand-500"></div>
+
+            <div class="flex flex-col items-center text-center">
+                <div id="alert-icon-container"
+                    class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-soft">
+                    <i id="alert-icon" data-lucide="info" class="w-8 h-8"></i>
+                </div>
+
+                <h3 id="alert-title" class="text-xl font-bold text-slate-900 mb-2">Notification</h3>
+                <p id="alert-message" class="text-sm text-slate-500 leading-relaxed font-medium mb-8">This is a custom
+                    message.</p>
+
+                <div class="flex gap-3 w-full" id="alert-buttons">
+                    <button id="alert-btn-cancel"
+                        class="hidden flex-1 px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all">
+                        Cancel
+                    </button>
+                    <button id="alert-btn-confirm"
+                        class="flex-1 px-6 py-3.5 btn-gold text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-lg">
+                        Okay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ICONS ---
+        lucide.createIcons();
+
+        // --- API CONFIG ---
+         const API_BASE = 'http://127.0.0.1:8004/api';
+        //*const API_BASE = 'https://api.keralahome.in/api';---
+
+
+        // --- TRANSLATIONS ---
+        const translations = {
+            en: {
+                welcome: "Hi! Welcome to the Insurance Assistant 👋",
+                select_lang: "Please choose the language you’re most comfortable with.",
+                looking_for_insurance: "Are you looking to get Medical Insurance today?",
+                yes_start: "Yes, let’s start",
+                no_cancel: "No, maybe later",
+                cancel_msg: "No worries! Just let us know whenever you need help 😊",
+                employee_or_dependent: "To get started, please tell us — are you an Employee or a Dependent?",
+                employee: "Employee",
+                dependent: "Dependent",
+                income_self: "What is your monthly income?",
+                income_sponsor: "What is your sponsor’s monthly income?",
+                dependent_type_q: "Please select the type of dependent you are.",
+                spouse: "Spouse",
+                child: "Child",
+                upload_self: "Please upload your valid Emirates ID to continue.",
+                upload_sponsor: "Please upload your Sponsor’s Emirates ID to continue.",
+                btn_upload: "Scan or Upload Emirates ID",
+                uploading: "Uploading your ID… please wait.",
+                review_details: "Please review your details carefully before proceeding.",
+                verified_details: "Verified Details",
+                name: "Full Name",
+                eid: "Emirates ID",
+                dob: "Date of Birth",
+                nationality: "Nationality",
+                gender: "Gender",
+                issuing_date: "Issuing Date",
+                expiry_date: "Expiry Date",
+                issuing_place: "Issuing Place",
+                occupation: "Occupation",
+                sponsor: "Sponsor",
+                mobile: "Mobile Number",
+                salary_range_label: "Salary Range",
+                found_plans: (n) => `Good news! I found ${n} eligible plan(s) for you. Please choose one to continue.`,
+                no_plans: "Sorry! Based on your salary range and issuing place, there are no eligible online plans available right now.",
+                eligible: "Eligible",
+                select_plan_msg: (name, type) => `I’d like to proceed with the ${name} (${type}) plan.`,
+                success_title: "Success 🎉",
+                policy_active: "Your policy is now active",
+                policy_no: "Policy Number",
+                premium: "Premium Amount",
+                continue_btn: "Continue",
+                welcome_back: "Welcome back! I’ve restored your previous session for you.",
+                continue_income: "Let’s continue from where you left off. Please select your income range.",
+                confirm_income: "Please confirm your monthly income:",
+                restart_prompt: "Please use the options above to continue your application.",
+                below_4000: "Below 4000 AED",
+                between_4000_5000: "4000 – 5000 AED",
+                above_5000: "Above 5000 AED",
+                fine_check_msg: "Before continuing, please check if there are any fines using the option below.",
+                fine_check_btn: "Fine Check",
+                checking_fines: "Checking for fines...",
+                no_fines_found: "No fines found. You’re good to go.",
+                moh_validation_msg: "Please complete MOH validation by clicking the button below to confirm success.",
+                moh_validation_btn: "MOH Validation",
+                validating_moh: "Validating with MOH...",
+                moh_success: "MOH validation successful.",
+                medical_q_init: "Do you have any pre-existing medical conditions?",
+                maf_q_title: "Medical Questionnaire (MAF)",
+                maf_q_intro: "Please answer the following 9 questions.",
+                yes: "Yes",
+                no: "No",
+                reset_failed: "Oops! We couldn’t reset the session. Please try again.",
+                start_fresh_q: "Start fresh?",
+                start_fresh_msg: "This will clear your current progress and restart the application.",
+                upload_failed: "We couldn’t process the document. Please try again.",
+                upload_error: "Something went wrong while uploading the document.",
+                return_dashboard: "Return to Dashboard",
+                verifying: "Verifying your details…",
+                sending: "Sending…",
+                connection_error_title: "Connection Issue",
+                connection_error_msg: "Please check your internet connection and try again.",
+                logout_q: "Log out",
+                logout_msg: "Are you sure you want to log out?",
+                exit_session_q: "Exit session?",
+                exit_session_msg: "If you exit now, your progress may be lost.",
+                login_failed_title: "Login Failed",
+                req_missing: "Some required information is missing",
+                enter_otp: "Please enter the verification code sent to you",
+                expired_doc_title: "Document Expired",
+                expired_doc_msg: "Your Emirates ID has expired. We can’t continue with the process.",
+                missing_info: "Missing Information",
+                enter_mobile: "Please enter a valid mobile number.",
+                review_details_title: "Review Your Details",
+                eid_no: "Emirates ID Number",
+                verification_title: "Verification",
+                extracted_label: "Extracted from Emirates ID",
+                verify_notice: "Please make sure the details match your Emirates ID to avoid rejection.",
+                confirm_btn: "Confirm and Continue",
+                male: "Male",
+                female: "Female",
+                mobile_number_label: "Mobile Number",
+                policy_info_label: "Policy Details",
+                user_details_label: "Your Details",
+                close_btn: "Close",
+                ai_placeholder: "Ask anything about insurance...",
+                ai_welcome_msg: "Hello! I'm your insurance assistant. Ask me about coverage, company details, or support.",
+                ai_thinking: "Gia is thinking...",
+                maf_q1: "Have you ever had any heart or cardiovascular problems?",
+                maf_q2: "Have you ever been diagnosed with diabetes?",
+                maf_q3: "Have you ever had any respiratory problems (e.g., Asthma, COPD)?",
+                maf_q4: "Have you ever had any chronic kidney or liver diseases?",
+                maf_q5: "Have you ever been diagnosed with cancer?",
+                maf_q6: "Have you ever had any neurological problems or strokes?",
+                maf_q7: "Do you have any chronic bone, joint, or muscle problems?",
+                maf_q8: "Have you ever been treated for any mental health or psychiatric conditions?",
+                maf_q9: "Are you currently taking any regular medications?",
+                maf_completed: "Thank you for completing the medical questionnaire.",
+                passport_upload_prompt: "Great. Now, please upload your <b>Passport</b> to continue.",
+                visa_upload_prompt: "Almost there! Please upload your <b>UAE Visa</b>.",
+                btn_upload_passport: "Upload Passport",
+                btn_upload_visa: "Upload Visa",
+                passport_no_label: "Passport No",
+                visa_file_no_label: "File No",
+                eid_no_label: "EID No",
+                passport_label: "Passport",
+                visa_details_title: "Visa Details",
+                passport_details_title: "Passport Details",
+                review_cancelled: "Review cancelled. Please re-upload.",
+                policy_failed: "Policy creation failed: ",
+                question_progress: (c, t) => `Question ${c} of ${t}`
+            },
+            ml: {
+                welcome: "ഇൻഷുറൻസ് അസിസ്റ്റന്റിലേക്ക് സ്വാഗതം 👋",
+                select_lang: "നിങ്ങൾക്ക് എളുപ്പമുള്ള ഭാഷ തിരഞ്ഞെടുക്കൂ.",
+                looking_for_insurance: "നിങ്ങൾ മെഡിക്കൽ ഇൻഷുറൻസ് എടുക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?",
+                yes_start: "അതെ, തുടങ്ങാം",
+                no_cancel: "വേണ്ട, പിന്നീട്",
+                cancel_msg: "ശരി 🙂 നിങ്ങൾക്ക് ആവശ്യമുണ്ടാകുമ്പോൾ ഞങ്ങളെ അറിയിക്കൂ.",
+                employee_or_dependent: "ആരംഭിക്കാൻ, ദയവായി പറയൂ — നിങ്ങൾ Employee ആണോ Dependent ആണോ?",
+                employee: "Employee (ജോലിക്കാരൻ)",
+                dependent: "Dependent (ആശ്രിതൻ)",
+                income_self: "നിങ്ങളുടെ പ്രതിമാസ വരുമാനം എത്രയാണ്?",
+                income_sponsor: "നിങ്ങളുടെ സ്പോൺസറുടെ പ്രതിമാസ വരുമാനം എത്രയാണ്?",
+                dependent_type_q: "നിങ്ങൾ ഏത് തരത്തിലുള്ള ആശ്രിതനാണ്?",
+                spouse: "ഭാര്യ / ഭർത്താവ്",
+                child: "കുട്ടി",
+                upload_self: "തുടരാൻ, ദയവായി നിങ്ങളുടെ Emirates ID അപ്‌ലോഡ് ചെയ്യൂ.",
+                upload_sponsor: "തുടരാൻ, ദയവായി സ്പോൺസറുടെ Emirates ID അപ്‌ലോഡ് ചെയ്യൂ.",
+                btn_upload: "സ്കാൻ ചെയ്യുക / ID അപ്‌ലോഡ് ചെയ്യുക",
+                uploading: "ID അപ്‌ലോഡ് ചെയ്യുന്നു… ദയവായി കാത്തിരിക്കുക.",
+                review_details: "തുടരുന്നതിന് മുമ്പ് നിങ്ങളുടെ വിവരങ്ങൾ പരിശോധിക്കൂ.",
+                verified_details: "സ്ഥിരീകരിച്ച വിവരങ്ങൾ",
+                name: "മുഴുവൻ പേര്",
+                eid: "Emirates ID",
+                dob: "ജനന തീയതി",
+                nationality: "ദേശീയത",
+                gender: "ലിംഗം",
+                issuing_date: "ഇഷ്യൂ ചെയ്ത തീയതി",
+                expiry_date: "കാലഹരണപ്പെടുന്ന തീയതി",
+                issuing_place: "ഇഷ്യൂ ചെയ്ത സ്ഥലം",
+                occupation: "തൊഴിൽ",
+                sponsor: "സ്പോൺസർ",
+                mobile: "മൊബൈൽ നമ്പർ",
+                salary_range_label: "വരുമാന പരിധി",
+                found_plans: (n) => `സന്തോഷവാർത്ത! നിങ്ങൾക്ക് അനുയോജ്യമായ ${n} പ്ലാൻ(കൾ) കണ്ടെത്തിയിട്ടുണ്ട്. ഒന്ന് തിരഞ്ഞെടുക്കൂ.`,
+                no_plans: "ക്ഷമിക്കണം. നിങ്ങളുടെ വരുമാനവും ഇഷ്യൂ ചെയ്ത സ്ഥലവും അടിസ്ഥാനമാക്കി ഇപ്പോൾ പ്ലാനുകൾ ലഭ്യമല്ല.",
+                eligible: "യോഗ്യമാണ്",
+                select_plan_msg: (name, type) => `ഞാൻ ${name} (${type}) പ്ലാൻ എടുക്കാം.`,
+                success_title: "വിജയം 🎉",
+                policy_active: "നിങ്ങളുടെ പോളിസി സജീവമായി",
+                policy_no: "പോളിസി നമ്പർ",
+                premium: "പ്രീമിയം",
+                continue_btn: "തുടരുക",
+                welcome_back: "വീണ്ടും സ്വാഗതം! നിങ്ങളുടെ മുൻ സെഷൻ പുനഃസ്ഥാപിച്ചിട്ടുണ്ട്.",
+                continue_income: "നമുക്ക് തുടരാം. ദയവായി വരുമാന പരിധി തിരഞ്ഞെടുക്കൂ.",
+                confirm_income: "ദയവായി നിങ്ങളുടെ പ്രതിമാസ വരുമാനം സ്ഥിരീകരിക്കൂ.",
+                restart_prompt: "മുകളിൽ നൽകിയിരിക്കുന്ന ഓപ്ഷനുകൾ ഉപയോഗിച്ച് തുടരൂ.",
+                below_4000: "4000 AED-ൽ താഴെ",
+                between_4000_5000: "4000 – 5000 AED",
+                above_5000: "5000 AED-ക്ക് മുകളിൽ",
+                fine_check_msg: "തുടരുന്നതിന് മുമ്പ്, താഴെയുള്ള ഓപ്ഷൻ ഉപയോഗിച്ച് ഫൈനുകൾ ഉണ്ടോ എന്ന് പരിശോധിക്കുക.",
+                fine_check_btn: "ഫൈൻ പരിശോധന",
+                checking_fines: "ഫൈനുകൾ പരിശോധിക്കുന്നു...",
+                no_fines_found: "ഫൈനുകൾ ഒന്നും കണ്ടെത്തിയില്ല. നിങ്ങൾക്ക് മുന്നോട്ട് പോകാം.",
+                moh_validation_msg: "വിജയം ഉറപ്പാക്കാൻ താഴെയുള്ള ബട്ടൺ ക്ലിക്ക് ചെയ്ത് MOH വാലിഡേഷൻ പൂർത്തിയാക്കുക.",
+                moh_validation_btn: "MOH വാലിഡേഷൻ",
+                validating_moh: "MOH വാലിഡേഷൻ നടക്കുന്നു...",
+                moh_success: "MOH വാലിഡേഷൻ വിജയകരമായി പൂർത്തിയായി.",
+                medical_q_init: "നിങ്ങൾക്ക് നിലവിൽ എന്തെങ്കിലും ആരോഗ്യപ്രശ്നങ്ങളുണ്ടോ?",
+                maf_q_title: "മെഡിക്കൽ ചോദ്യാവലി (MAF)",
+                maf_q_intro: "താഴെ പറയുന്ന 9 ചോദ്യങ്ങൾക്ക് മറുപടി നൽകുക.",
+                yes: "ഉണ്ട്",
+                no: "ഇല്ല",
+                reset_failed: "സെഷൻ റീസെറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കൂ.",
+                start_fresh_q: "പുതുതായി തുടങ്ങണോ?",
+                start_fresh_msg: "ഇത് നിലവിലെ പുരോഗതി മായ്ച്ച് വീണ്ടും തുടങ്ങും.",
+                upload_failed: "രേഖ പ്രോസസ് ചെയ്യാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കൂ.",
+                upload_error: "രേഖ അപ്‌ലോഡ് ചെയ്യുമ്പോൾ പിശക് സംഭവിച്ചു.",
+                return_dashboard: "ഡാഷ്‌ബോർഡിലേക്ക് മടങ്ങുക",
+                verifying: "വിവരങ്ങൾ പരിശോധിക്കുന്നു…",
+                sending: "അയക്കുന്നു…",
+                connection_error_title: "കണക്ഷൻ പ്രശ്നം",
+                connection_error_msg: "ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കൂ.",
+                logout_q: "ലോഗ് ഔട്ട് ചെയ്യണോ?",
+                logout_msg: "നിങ്ങൾക്ക് ലോഗ് ഔട്ട് ചെയ്യണമെന്ന് ഉറപ്പാണോ?",
+                exit_session_q: "സെഷൻ അവസാനിപ്പിക്കണോ?",
+                exit_session_msg: "ഇപ്പോൾ പുറത്തുപോയാൽ പുരോഗതി നഷ്ടപ്പെടാം.",
+                login_failed_title: "ലോഗിൻ പരാജയപ്പെട്ടു",
+                req_missing: "ആവശ്യമായ വിവരങ്ങൾ ലഭ്യമല്ല",
+                enter_otp: "നിങ്ങൾക്ക് ലഭിച്ച വെരിഫിക്കേഷൻ കോഡ് നൽകൂ",
+                expired_doc_title: "രേഖയുടെ കാലാവധി കഴിഞ്ഞു",
+                expired_doc_msg: "Emirates ID കാലഹരണപ്പെട്ടു. പ്രക്രിയ തുടരാൻ കഴിയില്ല.",
+                missing_info: "വിവരങ്ങൾ അപൂർണ്ണമാണ്",
+                enter_mobile: "ദയവായി സാധുവായ മൊബൈൽ നമ്പർ നൽകൂ.",
+                review_details_title: "വിവരങ്ങൾ പരിശോധിക്കുക",
+                eid_no: "Emirates ID നമ്പർ",
+                verification_title: "സ്ഥിരീകരണം",
+                extracted_label: "ID-യിൽ നിന്ന് എടുത്ത വിവരങ്ങൾ",
+                verify_notice: "റിജക്ഷൻ ഒഴിവാക്കാൻ വിവരങ്ങൾ ID-യുമായി പൊരുത്തപ്പെടുന്നുവെന്ന് ഉറപ്പാക്കൂ.",
+                confirm_btn: "സ്ഥിരീകരിച്ച് തുടരുക",
+                male: "പുരുഷൻ",
+                female: "സ്ത്രീ",
+                mobile_number_label: "മൊബൈൽ നമ്പർ",
+                policy_info_label: "പോളിസി വിവരങ്ങൾ",
+                user_details_label: "നിങ്ങളുടെ വിവരങ്ങൾ",
+                close_btn: "അടയ്ക്കുക",
+                ai_placeholder: "ഇൻഷുറൻസിനെക്കുറിച്ച് എന്തും ചോദിക്കൂ...",
+                ai_welcome_msg: "ഹലോ! ഞാൻ നിങ്ങളുടെ ഇൻഷുറൻസ് അസിസ്റ്റന്റാണ്. കവറേജ്, കമ്പനി വിവരങ്ങൾ അല്ലെങ്കിൽ സപ്പോർട്ട് എന്നിവയെക്കുറിച്ച് എന്നോട് ചോദിക്കാം.",
+                ai_thinking: "ജിയ ചിന്തിക്കുന്നു...",
+                maf_q1: "നിങ്ങൾക്ക് എപ്പോഴെങ്കിലും ഹൃദയ അല്ലെങ്കിൽ ഹൃദയവ്യവസ്ഥാ പ്രശ്നങ്ങൾ ഉണ്ടോ?",
+                maf_q2: "നിങ്ങൾക്ക് ഡയബറ്റസ് രോഗം കണ്ടെത്തിയിട്ടുണ്ടോ?",
+                maf_q3: "നിങ്ങൾക്ക് ശ്വാസകോശ സംബന്ധമായ പ്രശ്നങ്ങൾ ഉണ്ടോ (ഉദാഹരണത്തിന് ആസ്ത്മ, COPD)?",
+                maf_q4: "നിങ്ങൾക്ക് വൃക്ക അല്ലെങ്കിൽ കരൾ രോഗങ്ങൾ ഉണ്ടോ?",
+                maf_q5: "നിങ്ങൾക്ക് ക്യാൻസർ രോഗം കണ്ടെത്തിയിട്ടുണ്ടോ?",
+                maf_q6: "നിങ്ങൾക്ക് ന്യൂറോളജിക്കൽ പ്രശ്നങ്ങളോ പക്ഷാഘാതമോ ഉണ്ടായിട്ടുണ്ടോ?",
+                maf_q7: "നിങ്ങൾക്ക് എല്ല്, സന്ധി, അല്ലെങ്കിൽ പേശി സംബന്ധമായ പ്രശ്നങ്ങൾ ഉണ്ടോ?",
+                maf_q8: "നിങ്ങൾ മാനസികാരോഗ്യ പ്രശ്നങ്ങൾക്ക് ചികിത്സ തേടിയിട്ടുണ്ടോ?",
+                maf_q9: "നിങ്ങൾ നിലവിൽ സ്ഥിരമായി മരുന്നുകൾ കഴിക്കുന്നുണ്ടോ?",
+                maf_completed: "മെഡിക്കൽ ചോദ്യാവലി പൂർത്തിയാക്കിയതിന് നന്ദി.",
+                passport_upload_prompt: "നന്ദി. ഇനി തുടരാൻ, ദയവായി നിങ്ങളുടെ <b>പാസ്‌പോർട്ട്</b> അപ്‌ലോഡ് ചെയ്യൂ.",
+                visa_upload_prompt: "അവസാന ഘട്ടത്തിലേക്ക്! ദയവായി നിങ്ങളുടെ <b>UAE വിസ</b> അപ്‌ലോഡ് ചെയ്യൂ.",
+                btn_upload_passport: "പാസ്‌പോർട്ട് അപ്‌ലോഡ് ചെയ്യുക",
+                btn_upload_visa: "വിസ അപ്‌ലോഡ് ചെയ്യുക",
+                passport_no_label: "പാസ്‌പോർട്ട് നമ്പർ",
+                visa_file_no_label: "ഫയൽ നമ്പർ",
+                eid_no_label: "EID നമ്പർ",
+                passport_label: "പാസ്‌പോർട്ട്",
+                visa_details_title: "വിസ വിവരങ്ങൾ",
+                passport_details_title: "പാസ്‌പോർട്ട് വിവരങ്ങൾ",
+                review_cancelled: "പരിശോധന റദ്ദാക്കി. ദയവായി വീണ്ടും അപ്‌ലോഡ് ചെയ്യുക.",
+                policy_failed: "പോളിസി സൃഷ്ടിക്കുന്നത് പരാജയപ്പെട്ടു: ",
+                question_progress: (c, t) => `ചോദ്യം ${c} / ${t}`
+            },
+            ar: {
+                welcome: "مرحبًا بك 👋 في مساعد التأمين",
+                select_lang: "يرجى اختيار اللغة التي تفضلها.",
+                looking_for_insurance: "هل ترغب في الحصول على تأمين طبي اليوم؟",
+                yes_start: "نعم، لنبدأ",
+                no_cancel: "لا، لاحقًا",
+                cancel_msg: "لا مشكلة 😊 أخبرنا متى ما احتجت إلى المساعدة.",
+                employee_or_dependent: "للبدء، من فضلك أخبرنا — هل أنت موظف أم تابع؟",
+                employee: "موظف",
+                dependent: "تابع",
+                income_self: "ما هو دخلك الشهري؟",
+                income_sponsor: "ما هو الدخل الشهري للكفيل؟",
+                dependent_type_q: "ما نوع التابع الذي أنت عليه؟",
+                spouse: "زوج / زوجة",
+                child: "طفل",
+                upload_self: "للمتابعة، يرجى تحميل بطاقة الهوية الإماراتية الخاصة بك.",
+                upload_sponsor: "للمتابعة، يرجى تحميل بطاقة الهوية الإماراتية الخاصة بالكفيل.",
+                btn_upload: "مسح أو تحميل الهوية",
+                uploading: "جاري تحميل الهوية… يرجى الانتظار.",
+                review_details: "يرجى مراجعة بياناتك بعناية قبل المتابعة.",
+                verified_details: "البيانات المؤكدة",
+                name: "الاسم الكامل",
+                eid: "الهوية الإماراتية",
+                dob: "تاريخ الميلاد",
+                nationality: "الجنسية",
+                gender: "الجنس",
+                issuing_date: "تاريخ الإصدار",
+                expiry_date: "تاريخ الانتهاء",
+                issuing_place: "مكان الإصدار",
+                occupation: "المهنة",
+                sponsor: "الكفيل",
+                mobile: "رقم الهاتف المتحرك",
+                salary_range_label: "نطاق الراتب",
+                found_plans: (n) => `خبر سار! وجدنا ${n} خطة مؤهلة لك. يرجى اختيار إحداها للمتابعة.`,
+                no_plans: "نعتذر، بناءً على الراتب ومكان الإصدار، لا توجد خطط متاحة حاليًا.",
+                eligible: "مؤهل",
+                select_plan_msg: (name, type) => `أرغب في اختيار خطة ${name} (${type}).`,
+                success_title: "تم بنجاح 🎉",
+                policy_active: "تم تفعيل البوليصة الخاصة بك",
+                policy_no: "رقم البوليصة",
+                premium: "قيمة القسط",
+                continue_btn: "متابعة",
+                welcome_back: "مرحبًا بعودتك! لقد قمنا باستعادة جلستك السابقة.",
+                continue_income: "لنُكمل من حيث توقفت. يرجى اختيار نطاق الدخل.",
+                confirm_income: "يرجى تأكيد دخلك الشهري:",
+                restart_prompt: "يرجى استخدام الخيارات أعلاه لمتابعة الطلب.",
+                below_4000: "أقل من 4000 درهم",
+                between_4000_5000: "4000 – 5000 درهم",
+                above_5000: "أكثر من 5000 درهم",
+                fine_check_msg: "قبل المتابعة، يرجى التحقق من وجود أي غرامات باستخدام الخيار أدناه.",
+                fine_check_btn: "فحص الغرامات",
+                checking_fines: "جاري التحقق من الغرامات...",
+                no_fines_found: "لم يتم العثور على غرامات. يمكنك المتابعة.",
+                moh_validation_msg: "يرجى إكمال التحقق من وزارة الصحة بالنقر على الزر أدناه لتأكيد النجاح.",
+                moh_validation_btn: "التحقق من وزارة الصحة (MOH)",
+                validating_moh: "جاري التحقق مع وزارة الصحة...",
+                moh_success: "تم التحقق من وزارة الصحة بنجاح.",
+                medical_q_init: "هل لديك أي حالات طبية سابقة؟",
+                maf_q_title: "الاستبيان الطبي (MAF)",
+                maf_q_intro: "يرجى الإجابة على الأسئلة التسعة التالية.",
+                yes: "نعم",
+                no: "لا",
+                reset_failed: "لم نتمكن من إعادة تعيين الجلسة. يرجى المحاولة مرة أخرى.",
+                start_fresh_q: "البدء من جديد؟",
+                start_fresh_msg: "سيؤدي ذلك إلى مسح التقدم الحالي وبدء الطلب من جديد.",
+                upload_failed: "تعذر معالجة المستند. يرجى المحاولة مرة أخرى.",
+                upload_error: "حدث خطأ أثناء تحميل المستند.",
+                return_dashboard: "العودة إلى لوحة التحكم",
+                verifying: "جاري التحقق من البيانات…",
+                sending: "جاري الإرسال…",
+                connection_error_title: "مشكلة في الاتصال",
+                connection_error_msg: "يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.",
+                logout_q: "تسجيل الخروج",
+                logout_msg: "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+                exit_session_q: "إنهاء الجلسة؟",
+                exit_session_msg: "قد يتم فقدان التقدم إذا قمت بإنهاء الجلسة الآن.",
+                login_failed_title: "فشل تسجيل الدخول",
+                req_missing: "بعض المتطلبات مفقودة",
+                enter_otp: "يرجى إدخال رمز التحقق المرسل إليك",
+                expired_doc_title: "المستند منتهي الصلاحية",
+                expired_doc_msg: "انتهت صلاحية الهوية الإماراتية. لا يمكن متابعة العملية.",
+                missing_info: "معلومات ناقصة",
+                enter_mobile: "يرجى إدخال رقم هاتف متحرك صحيح.",
+                review_details_title: "مراجعة البيانات",
+                eid_no: "رقم الهوية الإماراتية",
+                verification_title: "التحقق",
+                extracted_label: "تم استخراجه من الهوية",
+                verify_notice: "يرجى التأكد من تطابق البيانات مع الهوية لتجنب الرفض.",
+                confirm_btn: "تأكيد والمتابعة",
+                male: "ذكر",
+                female: "أنثى",
+                mobile_number_label: "رقم الهاتف المتحرك",
+                policy_info_label: "معلومات البوليصة",
+                user_details_label: "بيانات المستخدم",
+                close_btn: "إغلاق",
+                ai_placeholder: "اسألني أي شيء عن التأمين...",
+                ai_welcome_msg: "أهلاً بك! أنا مساعد التأمين الخاص بك. اسألني عن التغطية، أو تفاصيل الشركة، أو الدعم الفني.",
+                ai_thinking: "جيا تفكر...",
+                maf_q1: "هل عانيت من أي مشاكل في القلب أو الأوعية الدموية؟",
+                maf_q2: "هل تم تشخيصك بمرض السكري؟",
+                maf_q3: "هل عانيت من أي مشاكل في الجهاز التنفسي (مثل الربو)؟",
+                maf_q4: "هل لديك أي أمراض مزمنة في الكلى أو الكبد؟",
+                maf_q5: "هل تم تشخيصك بالسرطان؟",
+                maf_q6: "هل عانيت من أي مشاكل عصبية أو سكتات دماغية؟",
+                maf_q7: "هل لديك أي مشاكل مزمنة في العظام أو المفاصل أو العضلات؟",
+                maf_q8: "هل تلقيت علاجًا لأي مشاكل نفسية؟",
+                maf_q9: "هل تتناول أي أدوية بانتظام حاليًا؟",
+                maf_completed: "شكراً لإكمال الاستبيان الطبي.",
+                passport_upload_prompt: "عظيم. الآن، يرجى تحميل <b>جواز السفر</b> للمتابعة.",
+                visa_upload_prompt: "أوشكنا على الانتهاء! يرجى تحميل <b>تأشيرة الإقامة</b>.",
+                btn_upload_passport: "تحميل جواز السفر",
+                btn_upload_visa: "تحميل التأشيرة",
+                passport_no_label: "رقم جواز السفر",
+                visa_file_no_label: "رقم الملف",
+                eid_no_label: "رقم الهوية",
+                passport_label: "جواز السفر",
+                visa_details_title: "تفاصيل التأشيرة",
+                passport_details_title: "تفاصيل جواز السفر",
+                review_cancelled: "تم إلغاء المراجعة. يرجى إعادة التحميل.",
+                policy_failed: "فشل إنشاء البوليصة: ",
+                question_progress: (c, t) => `السؤال ${c} من ${t}`
+            },
+            hi: {
+                welcome: "इंश्योरेंस असिस्टेंट में आपका स्वागत है 👋",
+                select_lang: "कृपया अपनी पसंद की भाषा चुनें।",
+                looking_for_insurance: "क्या आप आज मेडिकल इंश्योरेंस लेना चाहते हैं?",
+                yes_start: "हाँ, शुरू करें",
+                no_cancel: "नहीं, बाद में",
+                cancel_msg: "कोई बात नहीं 😊 जब ज़रूरत हो, हमें बताइए।",
+                employee_or_dependent: "शुरू करने के लिए बताइए — क्या आप कर्मचारी हैं या आश्रित?",
+                employee: "कर्मचारी (Employee)",
+                dependent: "आश्रित (Dependent)",
+                income_self: "आपकी मासिक आय कितनी है?",
+                income_sponsor: "आपके स्पॉन्सर की मासिक आय कितनी है?",
+                dependent_type_q: "आप किस प्रकार के आश्रित हैं?",
+                spouse: "पति / पत्नी",
+                child: "बच्चा",
+                upload_self: "आगे बढ़ने के लिए कृपया अपनी वैध Emirates ID अपलोड करें।",
+                upload_sponsor: "आगे बढ़ने के लिए कृपया अपने स्पॉन्सर की Emirates ID अपलोड करें।",
+                btn_upload: "स्कैन करें / ID अपलोड करें",
+                uploading: "ID अपलोड हो रही है… कृपया प्रतीक्षा करें।",
+                review_details: "आगे बढ़ने से पहले अपने विवरण की जाँच करें।",
+                verified_details: "सत्यापित विवरण",
+                name: "पूरा नाम",
+                eid: "Emirates ID",
+                dob: "जन्म तिथि",
+                nationality: "राष्ट्रीयता",
+                gender: "लिंग",
+                issuing_date: "जारी करने की तिथि",
+                expiry_date: "समाप्ति तिथि",
+                issuing_place: "जारी करने का स्थान",
+                occupation: "पेशा",
+                sponsor: "स्पॉन्सर",
+                mobile: "मोबाइल नंबर",
+                salary_range_label: "आय सीमा",
+                found_plans: (n) => `अच्छी खबर! आपके लिए ${n} योग्य प्लान मिले हैं। कृपया आगे बढ़ने के लिए एक चुनें।`,
+                no_plans: "माफ़ कीजिए, आपकी आय और जारी स्थान के आधार पर अभी कोई ऑनलाइन प्लान उपलब्ध नहीं है।",
+                eligible: "योग्य",
+                select_plan_msg: (name, type) => `मैं ${name} (${type}) प्लान चुनना चाहता/चाहती हूँ।`,
+                success_title: "सफलता 🎉",
+                policy_active: "आपकी पॉलिसी सक्रिय हो गई है",
+                policy_no: "पॉलिसी नंबर",
+                premium: "प्रीमियम राशि",
+                continue_btn: "जारी रखें",
+                welcome_back: "वापसी पर स्वागत है! आपका पिछला सत्र बहाल कर दिया गया है।",
+                continue_income: "जहाँ से रुके थे, वहीं से आगे बढ़ते हैं। कृपया आय सीमा चुनें।",
+                confirm_income: "कृपया अपना मासिक आय पुष्टि करें:",
+                restart_prompt: "आवेदन जारी रखने के लिए ऊपर दिए गए विकल्पों का उपयोग करें।",
+                below_4000: "4000 AED से कम",
+                between_4000_5000: "4000 – 5000 AED",
+                above_5000: "5000 AED से अधिक",
+                fine_check_msg: "जारी रखने से पहले, कृपया नीचे दिए गए विकल्प का उपयोग करके देखें कि क्या कोई जुर्माना (fine) है।",
+                fine_check_btn: "जुर्माना जाँच (Fine Check)",
+                checking_fines: "जुर्माने की जाँच की जा रही है...",
+                no_fines_found: "कोई जुर्माना नहीं मिला। आप आगे बढ़ सकते हैं।",
+                moh_validation_msg: "सफलता की पुष्टि करने के लिए कृपया नीचे दिए गए बटन पर क्लिक करके MOH सत्यापन पूरा करें।",
+                moh_validation_btn: "MOH सत्यापन",
+                validating_moh: "MOH के साथ सत्यापन किया जा रहा है...",
+                moh_success: "MOH सत्यापन सफल रहा।",
+                medical_q_init: "क्या आपको पहले से कोई चिकित्सीय स्थिति (pre-existing medical condition) है?",
+                maf_q_title: "मेडिकल प्रश्नावली (MAF)",
+                maf_q_intro: "कृपया नीचे दिए गए 9 प्रश्नों के उत्तर दें।",
+                yes: "हाँ",
+                no: "नहीं",
+                reset_failed: "सत्र रीसेट नहीं हो सका। कृपया दोबारा प्रयास करें।",
+                start_fresh_q: "फिर से शुरू करें?",
+                start_fresh_msg: "इससे आपकी मौजूदा प्रगति मिट जाएगी और प्रक्रिया दोबारा शुरू होगी।",
+                upload_failed: "दस्तावेज़ प्रोसेस नहीं हो सका। कृपया फिर से प्रयास करें।",
+                upload_error: "दस्तावेज़ अपलोड करते समय त्रुटि हुई।",
+                return_dashboard: "डैशबोर्ड पर वापस जाएँ",
+                verifying: "जानकारी सत्यापित की जा रही है…",
+                sending: "भेजा जा रहा है…",
+                connection_error_title: "कनेक्शन समस्या",
+                connection_error_msg: "कृपया अपना इंटरनेट कनेक्शन जाँचें और फिर कोशिश करें।",
+                logout_q: "लॉग आउट करें?",
+                logout_msg: "क्या आप वाकई लॉग आउट करना चाहते हैं?",
+                exit_session_q: "सत्र समाप्त करें?",
+                exit_session_msg: "अभी बाहर निकलने पर आपकी प्रगति खो सकती है।",
+                login_failed_title: "लॉगिन असफल",
+                req_missing: "कुछ आवश्यक जानकारी अधूरी है",
+                enter_otp: "कृपया आपको भेजा गया सत्यापन कोड दर्ज करें",
+                expired_doc_title: "दस्तावेज़ की अवधि समाप्त",
+                expired_doc_msg: "Emirates ID की अवधि समाप्त हो चुकी है। प्रक्रिया आगे नहीं बढ़ सकती।",
+                missing_info: "जानकारी अधूरी है",
+                enter_mobile: "कृपया एक वैध मोबाइल नंबर दर्ज करें।",
+                review_details_title: "विवरण की समीक्षा करें",
+                eid_no: "Emirates ID नंबर",
+                verification_title: "सत्यापन",
+                extracted_label: "ID से प्राप्त जानकारी",
+                verify_notice: "अस्वीकृति से बचने के लिए विवरण Emirates ID से मिलान करें।",
+                confirm_btn: "पुष्टि करें और आगे बढ़ें",
+                male: "पुरुष",
+                female: "महिला",
+                mobile_number_label: "मोबाइल नंबर",
+                policy_info_label: "पॉलिसी जानकारी",
+                user_details_label: "उपयोगकर्ता विवरण",
+                close_btn: "बंद करें",
+                ai_placeholder: "बीमा के बारे में कुछ भी पूछें...",
+                ai_welcome_msg: "नमस्ते! मैं आपका इंश्योरेंस असिस्टेंट हूँ। मुझसे कवरेज, कंपनी विवरण या सहायता के बारे में पूछें।",
+                ai_thinking: "जिया सोच रही है...",
+                maf_q1: "क्या आपको कभी दिल या हृदय संबंधी कोई समस्या हुई है?",
+                maf_q2: "क्या आपको कभी मधुमेह (Diabetes) का पता चला है?",
+                maf_q3: "क्या आपको कभी श्वसन संबंधी कोई समस्या (जैसे अस्थमा) हुई है?",
+                maf_q4: "क्या आपको गुर्दे या लीवर की कोई पुरानी बीमारी है?",
+                maf_q5: "क्या आपको कभी कैंसर का पता चला है?",
+                maf_q6: "क्या आपको कभी कोई न्यूरोलॉजिकल समस्या या स्ट्रोक हुआ है?",
+                maf_q7: "क्या आपको हड्डियों, जोड़ों या मांसपेशियों की कोई पुरानी समस्या है?",
+                maf_q8: "क्या आपने कभी किसी मानसिक स्वास्थ्य समस्या का इलाज कराया है?",
+                maf_q9: "क्या आप वर्तमान में कोई नियमित दवा ले रहे हैं?",
+                maf_completed: "मेडिकल प्रश्नावली पूरी करने के लिए धन्यवाद।",
+                passport_upload_prompt: "बहुत बढ़िया। अब, कृपया जारी रखने के लिए अपना <b>पासपोर्ट</b> अपलोड करें।",
+                visa_upload_prompt: "बस हो गया! कृपया अपना <b>UAE वीज़ा</b> अपलोड करें।",
+                btn_upload_passport: "पासपोर्ट अपलोड करें",
+                btn_upload_visa: "वीज़ा अपलोड करें",
+                passport_no_label: "पासपोर्ट नंबर",
+                visa_file_no_label: "फ़ाइल नंबर",
+                eid_no_label: "EID नंबर",
+                passport_label: "पासपोर्ट",
+                visa_details_title: "वीज़ा विवरण",
+                passport_details_title: "पासपोर्ट विवरण",
+                review_cancelled: "समीक्षा रद्द कर दी गई। कृपया पुन: अपलोड करें।",
+                policy_failed: "पॉलिसी निर्माण विफल: ",
+                question_progress: (c, t) => `प्रश्न ${c} / ${t}`
+            },
+            ur: {
+                welcome: "انشورنس اسسٹنٹ میں خوش آمدید 👋",
+                select_lang: "براہِ کرم اپنی پسند کی زبان منتخب کریں۔",
+                looking_for_insurance: "کیا آپ آج میڈیکل انشورنس لینا چاہتے ہیں؟",
+                yes_start: "جی ہاں، شروع کریں",
+                no_cancel: "نہیں، بعد میں",
+                cancel_msg: "کوئی مسئلہ نہیں 😊 جب ضرورت ہو ہمیں بتائیں۔",
+                employee_or_dependent: "شروع کرنے کے لیے بتائیں — کیا آپ ملازم ہیں یا زیرِ کفالت؟",
+                employee: "ملازم (Employee)",
+                dependent: "زیرِ کفالت (Dependent)",
+                income_self: "آپ کی ماہانہ آمدنی کتنی ہے؟",
+                income_sponsor: "آپ کے اسپانسر کی ماہانہ آمدنی کتنی ہے؟",
+                dependent_type_q: "آپ کس قسم کے زیرِ کفالت ہیں؟",
+                spouse: "شوہر / بیوی",
+                child: "بچہ",
+                upload_self: "آگے بڑھنے کے لیے براہِ کرم اپنی درست Emirates ID اپ لوڈ کریں۔",
+                upload_sponsor: "آگے بڑھنے کے لیے براہِ کرم اپنے اسپانسر کی Emirates ID اپ لوڈ کریں۔",
+                btn_upload: "اسکین کریں / ID اپ لوڈ کریں",
+                uploading: "ID اپ لوڈ ہو رہی ہے… براہِ کرم انتظار کریں۔",
+                review_details: "آگے بڑھنے سے پہلے اپنی معلومات غور سے چیک کریں۔",
+                verified_details: "تصدیق شدہ معلومات",
+                name: "پورا نام",
+                eid: "Emirates ID",
+                dob: "تاریخِ پیدائش",
+                nationality: "قومیت",
+                gender: "جنس",
+                issuing_date: "اجراء کی تاریخ",
+                expiry_date: "میعاد ختم ہونے کی تاریخ",
+                issuing_place: "اجراء کی جگہ",
+                occupation: "پیشہ",
+                sponsor: "اسپانسر",
+                mobile: "موبائل نمبر",
+                salary_range_label: "آمدنی کی حد",
+                found_plans: (n) => `خوشخبری! آپ کے لیے ${n} اہل پلان دستیاب ہیں۔ براہِ کرم ایک منتخب کریں۔`,
+                no_plans: "معذرت، آپ کی آمدنی اور اجراء کی جگہ کے مطابق اس وقت کوئی آن لائن پلان دستیاب نہیں ہے۔",
+                eligible: "اہل",
+                select_plan_msg: (name, type) => `میں ${name} (${type}) پلان منتخب کرنا چاہتا/چاہتی ہوں۔`,
+                success_title: "کامیابی 🎉",
+                policy_active: "آپ کی پالیسی فعال ہو گئی ہے",
+                policy_no: "پالیسی نمبر",
+                premium: "پریمیم رقم",
+                continue_btn: "جاری رکھیں",
+                welcome_back: "دوبارہ خوش آمدید! آپ کا پچھلا سیشن بحال کر دیا گیا ہے۔",
+                continue_income: "جہاں سے آپ رکے تھے وہیں سے آگے بڑھتے ہیں۔ براہِ کرم آمدنی کی حد منتخب کریں۔",
+                confirm_income: "براہِ کرم اپنی ماہانہ آمدنی کی تصدیق کریں:",
+                restart_prompt: "درخواست جاری رکھنے کے لیے اوپر دیے گئے اختیارات استعمال کریں۔",
+                below_4000: "4000 AED سے کم",
+                between_4000_5000: "4000 – 5000 AED",
+                above_5000: "5000 AED سے زیادہ",
+                fine_check_msg: "جاری رکھنے سے پہلے، براہ کرم نیچے دیے گئے آپشن کا استعمال کرتے ہوئے چیک کریں کہ آیا کوئی جرمانہ (fine) تو نہیں ہے۔",
+                fine_check_btn: "جرمانہ چیک کریں",
+                checking_fines: "جرمانے کی جانچ کی جا رہی ہے...",
+                no_fines_found: "کوئی جرمانہ نہیں ملا۔ آپ آگے بڑھ سکتے ہیں۔",
+                moh_validation_msg: "کامیابی کی تصدیق کے لیے براہ کرم نیچے دیے گئے بٹن پر کلک کر کے MOH کی توثیق مکمل کریں۔",
+                moh_validation_btn: "MOH کی توثیق",
+                validating_moh: "MOH کے ساتھ توثیق کی جا رہی ہے...",
+                moh_success: "MOH کی توثیق کامیاب رہی۔",
+                medical_q_init: "کیا آپ کو پہلے سے کوئی طبی مسئلہ لاحق ہے؟",
+                maf_q_title: "میڈیکل سوالنامہ (MAF)",
+                maf_q_intro: "براہِ کرم درج ذیل 9 سوالات کے جواب دیں۔",
+                yes: "جی ہاں",
+                no: "نہیں",
+                reset_failed: "سیشن ری سیٹ نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔",
+                start_fresh_q: "دوبارہ شروع کریں؟",
+                start_fresh_msg: "اس سے موجودہ پیش رفت ختم ہو جائے گی اور عمل دوبارہ شروع ہوگا۔",
+                upload_failed: "دستاویز پر کارروائی نہیں ہو سکی۔ براہِ کرم دوبارہ کوشش کریں۔",
+                upload_error: "دستاویز اپ لوڈ کرتے وقت مسئلہ پیش آیا۔",
+                return_dashboard: "ڈیش بورڈ پر واپس جائیں",
+                verifying: "معلومات کی تصدیق کی جا رہی ہے…",
+                sending: "بھیجا جا رہا ہے…",
+                connection_error_title: "کنکشن کا مسئلہ",
+                connection_error_msg: "براہِ کرم انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
+                logout_q: "لاگ آؤٹ کریں؟",
+                logout_msg: "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
+                exit_session_q: "سیشن ختم کریں؟",
+                exit_session_msg: "ابھی باہر نکلنے سے آپ کی پیش رفت ضائع ہو سکتی ہے۔",
+                login_failed_title: "لاگ اِن ناکام",
+                req_missing: "کچھ ضروری معلومات موجود نہیں ہیں",
+                enter_otp: "براہِ کرم آپ کو بھیجا گیا تصدیقی کوڈ درج کریں",
+                expired_doc_title: "دستاویز کی میعاد ختم",
+                expired_doc_msg: "Emirates ID کی میعاد ختم ہو چکی ہے۔ عمل جاری نہیں رکھا جا سکتا۔",
+                missing_info: "معلومات نامکمل ہیں",
+                enter_mobile: "براہِ کرم درست موبائل نمبر درج کریں۔",
+                review_details_title: "تفصیلات کا جائزہ لیں",
+                eid_no: "Emirates ID نمبر",
+                verification_title: "تصدیق",
+                extracted_label: "ID سے حاصل کردہ معلومات",
+                verify_notice: "رد ہونے سے بچنے کے لیے تصدیق کریں کہ معلومات ID سے مطابقت رکھتی ہیں۔",
+                confirm_btn: "تصدیق کریں اور آگے بڑھیں",
+                male: "مرد",
+                female: "عورت",
+                mobile_number_label: "موبائل نمبر",
+                policy_info_label: "پالیسی کی معلومات",
+                user_details_label: "صارف کی تفصیلات",
+                close_btn: "بند کریں",
+                ai_placeholder: "انشورنس کے بارے میں کچھ بھی پوچھیں...",
+                ai_welcome_msg: "ہیلو! میں آپ کا انشورنس اسسٹنٹ ہوں۔ مجھ سے کوریج، کمپنی کی تفصیلات، یا سپورٹ کے بارے میں پوچھیں۔",
+                ai_thinking: "جیا سوچ رہی ہے...",
+                maf_q1: "کیا آپ کو کبھی دل یا قلبی مسائل کا سامنا کرنا پڑا ہے؟",
+                maf_q2: "کیا آپ کو کبھی ذیابیطس (شوگر) کی تشخیص ہوئی ہے؟",
+                maf_q3: "کیا آپ کو کبھی سانس کی کوئی بیماری (جیسے دمہ) ہوئی ہے؟",
+                maf_q4: "کیا آپ کو گردے یا جگر کی کوئی پرانی بیماری ہے؟",
+                maf_q5: "کیا آپ کو کبھی کینسر کی تشخیص ہوئی ہے؟",
+                maf_q6: "کیا آپ کو کبھی کوئی اعصابی مسئلہ یا فالج ہوا ہے؟",
+                maf_q7: "کیا آپ کو ہڈیوں، جوڑوں یا پٹھوں کا کوئی پرانا مسئلہ ہے؟",
+                maf_q8: "کیا آپ نے کبھی کسی دماغی صحت کے مسئلے کا علاج کروایا ہے؟",
+                maf_q9: "کیا آپ فی الحال کوئی باقاعدہ دوا لے رہے ہیں؟",
+                maf_completed: "میڈیکل سوالنامہ مکمل کرنے کا شکریہ۔",
+                passport_upload_prompt: "زبردست۔ اب، جاری رکھنے کے لیے براہِ کرم اپنا <b>پاسپورٹ</b> اپ لوڈ کریں۔",
+                visa_upload_prompt: "تقریباً مکمل! براہِ کرم اپنا <b>UAE ویزا</b> اپ لوڈ کریں۔",
+                btn_upload_passport: "پاسپورٹ اپ لوڈ کریں",
+                btn_upload_visa: "ویزا اپ لوڈ کریں",
+                passport_no_label: "پاسپورٹ نمبر",
+                visa_file_no_label: "فائل نمبر",
+                eid_no_label: "EID نمبر",
+                passport_label: "پاسپورٹ",
+                visa_details_title: "ویزا کی تفصیلات",
+                passport_details_title: "پاسپورٹ کی تفصیلات",
+                review_cancelled: "جائزہ منسوخ کر دیا گیا۔ براہ کرم دوبارہ اپ لوڈ کریں۔",
+                policy_failed: "پالیسی بنانا ناکام رہا: ",
+                question_progress: (c, t) => `سوال ${c} / ${t}`
+            }
+        };
+
+        function t(key, ...args) {
+            const lang = state.insuranceData.lang || 'en';
+            const dict = translations[lang] || translations.en;
+            const val = dict[key] || translations.en[key] || key;
+            if (typeof val === 'function') return val(...args);
+            return val;
+        }
+
+        function isRTL() {
+            const lang = state.insuranceData.lang || 'en';
+            return ['ar', 'ur'].includes(lang);
+        }
+
+        // --- STATE ---
+        const state = {
+            user: null,
+            mode: 'none', // 'insurance' or 'ai'
+            insuranceData: {},
+            chatHistory: [],
+            aiChatHistory: [],
+            policies: []
+        };
+
+        function authHeaders(extra = {}) {
+            const token = localStorage.getItem('access_token');
+            const headers = { ...extra };
+            if (token && token !== 'undefined' && token !== 'null') {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+
+        function getCurrentStream() {
+            return state.mode === 'ai'
+                ? document.getElementById('ai-chat-stream')
+                : document.getElementById('chat-stream');
+        }
+
+        // --- COOKIE HELPER ---
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // --- API HELPER ---
+        // async function apiCall(endpoint, method = 'GET', data = null, isFileUpload = false) {
+        //     const options = {
+        //         method: method,
+        //         credentials: 'include', // Important for cookies/session
+        //         headers: {
+        //             'X-CSRFToken': getCookie('csrftoken') // Add CSRF Token
+        //         }
+        //     };
+
+        //     if (data) {
+        //         if (isFileUpload) {
+        //             options.body = data; // FormData content-type is auto-set
+        //         } else {
+        //             options.headers['Content-Type'] = 'application/json';
+        //             options.body = JSON.stringify(data);
+        //         }
+        //     }
+
+        //     try {
+        //         const response = await fetch(`${API_BASE}${endpoint}`, options);
+        //         const result = await response.json();
+        //         return result;
+        //     } catch (error) {
+        //         console.error('API Error:', error);
+        //         showAlert('error', t('connection_error_title'), t('connection_error_msg'));
+        //         return { success: false, message: 'Network or Server Error' };
+        //     }
+        // }
+
+        async function apiCall(endpoint, method = 'GET', data = null, isFileUpload = false) {
+            const headers = authHeaders();
+
+            if (!isFileUpload) {
+                headers['Content-Type'] = 'application/json';
+            }
+
+            const options = {
+                method,
+                headers
+            };
+
+            if (data) {
+                options.body = isFileUpload ? data : JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                showAlert('error', t('connection_error_title'), t('connection_error_msg'));
+                return { success: false };
+            }
+        }
+
+
+        // --- CUSTOM UI ALERTS ---
+        let alertPromiseResolve = null;
+
+        /**
+         * Custom Alert System
+         * @param {string} type - 'success', 'error', 'warning', 'info', 'confirm'
+         */
+        function showAlert(type, title, message, callback = null) {
+            const modal = document.getElementById('modal-alert');
+            const iconContainer = document.getElementById('alert-icon-container');
+            const icon = document.getElementById('alert-icon');
+            const titleEl = document.getElementById('alert-title');
+            const msgEl = document.getElementById('alert-message');
+            const accent = document.getElementById('alert-accent');
+            const confirmBtn = document.getElementById('alert-btn-confirm');
+            const cancelBtn = document.getElementById('alert-btn-cancel');
+
+            // Reset
+            cancelBtn.classList.add('hidden');
+            confirmBtn.innerText = 'Okay';
+
+            // Map types to styles
+            const configs = {
+                success: { icon: 'check', color: 'bg-emerald-500', iconColor: 'text-emerald-500', bg: 'bg-emerald-50', accent: 'bg-emerald-500' },
+                error: { icon: 'x-circle', color: 'bg-red-500', iconColor: 'text-red-500', bg: 'bg-red-50', accent: 'bg-red-500' },
+                warning: { icon: 'alert-triangle', color: 'bg-amber-500', iconColor: 'text-amber-500', bg: 'bg-amber-50', accent: 'bg-amber-500' },
+                info: { icon: 'info', color: 'bg-brand-500', iconColor: 'text-brand-500', bg: 'bg-brand-50', accent: 'bg-brand-500' },
+                confirm: { icon: 'help-circle', color: 'bg-brand-500', iconColor: 'text-brand-500', bg: 'bg-brand-50', accent: 'bg-brand-500' }
+            };
+
+            const config = configs[type] || configs.info;
+
+            icon.setAttribute('data-lucide', config.icon);
+            iconContainer.className = `w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-soft ${config.bg} ${config.iconColor}`;
+            accent.className = `absolute top-0 left-0 w-full h-2 ${config.accent}`;
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+
+            if (type === 'confirm') {
+                cancelBtn.classList.remove('hidden');
+                confirmBtn.innerText = 'Confirm';
+            }
+
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            lucide.createIcons();
+
+            return new Promise((resolve) => {
+                confirmBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('modal-open');
+                    if (callback) callback(true);
+                    resolve(true);
+                };
+                cancelBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('modal-open');
+                    if (callback) callback(false);
+                    resolve(false);
+                };
+            });
+        }
+
+        // --- AUTH CHECK ---
+        async function checkAuth() {
+            const token = localStorage.getItem('access_token');
+
+            if (token) {
+                // Fetch User Details
+                try {
+                    const res = await apiCall('/auth/me/');
+                    if (res.success) {
+                        state.user = res.user;
+                        updateUserHeader();
+                    }
+                } catch (e) {
+                    console.error("Auth check failed", e);
+                }
+
+                showView('view-landing');
+                fetchPolicies();
+            } else {
+                showView('view-login');
+            }
+        }
+
+
+        // --- NAVIGATION ---
+        function showView(viewId) {
+            // Hide all sections inside main
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+
+            // Show requested view
+            const view = document.getElementById(viewId);
+            view.classList.remove('hidden');
+
+            const header = document.getElementById('header');
+            const backBtn = document.getElementById('backBtn');
+            const title = document.getElementById('pageTitle');
+
+            if (viewId === 'view-login') {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+                header.classList.add('flex');
+
+                if (viewId === 'view-landing') {
+                    backBtn.classList.add('hidden');
+                    title.innerText = 'DASHBOARD';
+                } else {
+                    backBtn.classList.remove('hidden');
+                    if (viewId === 'view-chat-interface') {
+                        title.innerText = state.mode === 'insurance' ? 'APPLICATION' : 'ASSISTANT';
+                    }
+                    else if (viewId === 'view-details') title.innerText = 'PORTFOLIO';
+                    else title.innerText = 'DETAILS';
+                }
+                updateUserHeader();
+            }
+
+            // Scroll to top
+            document.querySelector('main').scrollTop = 0;
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        function updateUserHeader() {
+            if (state.user) {
+                // Determine display name
+                let displayName = state.user.first_name
+                    ? `${state.user.first_name} ${state.user.last_name || ''}`.trim()
+                    : (state.user.email ? state.user.email.split('@')[0] : 'Guest');
+
+                // Truncate if too long
+                if (displayName.length > 15) displayName = displayName.substring(0, 12) + '...';
+
+                // Initial for circle
+                const initial = displayName.charAt(0).toUpperCase();
+
+                const nameEl = document.getElementById('header-username');
+                const initEl = document.getElementById('header-initials');
+
+                if (nameEl) nameEl.innerText = displayName;
+                if (initEl) initEl.innerText = initial;
+            }
+        }
+
+        function goBack() {
+            if (state.mode !== 'none') {
+                showAlert('confirm', t('exit_session_q'), t('exit_session_msg'), (confirmed) => {
+                    if (confirmed) {
+                        state.mode = 'none';
+                        showView('view-landing');
+                    }
+                });
+            } else {
+                showView('view-landing');
+            }
+        }
+
+        function goToLanding() {
+            state.mode = 'none';
+            showView('view-landing');
+        }
+
+        function logout() {
+            showAlert('confirm', t('logout_q'), t('logout_msg'), (confirmed) => {
+                if (confirmed) {
+                    localStorage.removeItem('access_token');
+                    state.user = null;
+                    resetLogin();
+                    showView('view-login');
+                }
+            });
+        }
+
+
+        // --- LOGIN ---
+        async function sendOTP() {
+            const email = document.getElementById('emailInput').value;
+            if (!email) {
+                document.getElementById('emailInput').focus();
+                return;
+            }
+
+            const btn = document.querySelector('button[onclick="sendOTP()"]');
+            const originalText = btn.innerText;
+            btn.innerText = t('sending');
+            btn.disabled = true;
+
+            const res = await apiCall('/auth/send-otp/', 'POST', { email });
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+
+            if (res.success) {
+                document.getElementById('login-step-1').classList.add('hidden');
+                document.getElementById('login-step-2').classList.remove('hidden');
+                document.getElementById('login-step-2').classList.add('fade-in');
+                // DEV TIP: Show OTP in alert or console for easier testing if returned
+                if (res.otp) console.log("DEV OTP:", res.otp);
+            } else {
+                showAlert('error', t('login_failed_title'), res.message || 'Failed to send OTP');
+            }
+        }
+
+        async function verifyOTP() {
+            const email = document.getElementById('emailInput').value;
+            const otp = document.getElementById('otpInput').value;
+
+            if (!otp) {
+                showAlert('warning', t('req_missing'), t('enter_otp'));
+                return;
+            }
+
+            const btn = document.querySelector('button[onclick="verifyOTP()"]');
+            const originalText = btn.innerText;
+            btn.innerText = t('verifying');
+            btn.disabled = true;
+
+            const res = await apiCall('/auth/verify-otp/', 'POST', { email, otp_code: otp });
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+
+            if (res.success) {
+                localStorage.setItem('access_token', res.access_token);
+                state.user = res.user;
+                showView('view-landing');
+                fetchPolicies();
+            } else {
+                showAlert('error', 'Verification Failed', res.message || 'Invalid OTP');
+            }
+        }
+
+        function resetLogin() {
+            document.getElementById('login-step-2').classList.add('hidden');
+            document.getElementById('login-step-1').classList.remove('hidden');
+            document.getElementById('emailInput').value = '';
+            document.getElementById('otpInput').value = '';
+        }
+
+        // --- CHAT SYSTEM ---
+
+        async function clearChatSession() {
+            showAlert('confirm', t('start_fresh_q'), t('start_fresh_msg'), async (confirmed) => {
+                if (!confirmed) return;
+
+                // Call backend to reset session
+                const res = await apiCall('/insurance/applications/reset_session/', 'POST');
+
+                if (res.success) {
+                    // Clear Local State
+                    state.chatHistory = [];
+                    state.insuranceData = {};
+
+                    // Clear UI
+                    clearChatUI();
+
+                    // Restart Flow
+                    if (state.mode === 'insurance') {
+                        initFlow();
+                    } else if (state.mode === 'ai') {
+                        openAskAI();
+                    }
+                } else {
+                    showAlert('error', t('reset_failed'), t('reset_failed'));
+                }
+            });
+        }
+
+        function clearChatUI() {
+            document.getElementById('chat-stream').innerHTML = '';
+            document.getElementById('chat-options-container').innerHTML = '';
+            document.getElementById('chat-options-container').classList.add('hidden');
+        }
+
+        function addChatBubble(content, sender = 'bot', isHtml = false, delay = 0) {
+            const container = getCurrentStream();
+            if (!container) return Promise.resolve();
+
+            // 1. Add to local state history
+            const msgObj = { content, sender, isHtml, timestamp: new Date().toISOString() };
+            if (state.mode === 'ai') {
+                state.aiChatHistory.push(msgObj);
+            } else {
+                state.chatHistory.push(msgObj);
+            }
+
+            // 2. Sync to backend if we have an active application
+            if (state.mode === 'insurance' && state.insuranceData.applicationId && sender !== 'system') {
+                syncChatHistory();
+            }
+
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    // Only remove typing indicator when bot is responding
+                    if (sender !== 'user') {
+                        const existingTyping = container.querySelector('.typing-indicator-box');
+                        if (existingTyping) existingTyping.remove();
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = `chat-bubble ${sender === 'user' ? 'chat-user' : 'chat-bot'} fade-in mb-4`;
+                    if (isRTL() && sender === 'bot') {
+                        div.style.direction = 'rtl';
+                    }
+
+                    if (isHtml) div.innerHTML = content;
+                    else div.innerText = content;
+
+                    container.appendChild(div);
+                    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    lucide.createIcons();
+                    resolve();
+                }, delay);
+            });
+        }
+
+        async function syncChatHistory() {
+            // Debounce or just send? For now just send.
+            if (!state.insuranceData.applicationId) return;
+
+            try {
+                // We send the entire history or append? 
+                // Django JSONField replaces by default. So we send full history.
+                await apiCall(`/insurance/applications/${state.insuranceData.applicationId}/`, 'PATCH', {
+                    chat_history: state.chatHistory
+                });
+            } catch (e) {
+                console.error("Failed to sync chat", e);
+            }
+        }
+
+        function renderChatHistoryFromState() {
+            const container = document.getElementById('chat-stream');
+            if (!container) return;
+
+            container.innerHTML = ''; // Clear existing
+
+            if (!Array.isArray(state.chatHistory)) {
+                console.error("chatHistory is not an array:", state.chatHistory);
+                state.chatHistory = [];
+                return;
+            }
+
+            state.chatHistory.forEach(msg => {
+                if (!msg || !msg.content) return;
+                const div = document.createElement('div');
+                div.className = `chat-bubble ${msg.sender === 'user' ? 'chat-user' : 'chat-bot'} fade-in mb-4`;
+                if (isRTL() && msg.sender === 'bot') {
+                    div.style.direction = 'rtl';
+                }
+
+                if (msg.isHtml) div.innerHTML = msg.content;
+                else div.innerText = msg.content;
+                container.appendChild(div);
+            });
+
+            // Scroll to bottom
+            setTimeout(() => {
+                if (container.lastChild) container.lastChild.scrollIntoView({ behavior: 'smooth' });
+                lucide.createIcons();
+            }, 100);
+        }
+
+        function showTyping() {
+            const container = getCurrentStream();
+            if (!container) return;
+
+            // Remove existing one if any
+            const existing = container.querySelector('.typing-indicator-box');
+            if (existing) existing.remove();
+
+            const div = document.createElement('div');
+            // Premium glass style for the thinking indicator
+            div.className = 'chat-bubble chat-bot fade-in mb-4 typing-indicator-box flex items-center justify-center py-3 px-5 border border-slate-100 shadow-soft';
+
+            if (isRTL()) {
+                div.style.direction = 'rtl';
+            }
+
+            // Universal Premium Animation (Gia)
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="flex gap-1.5 relative">
+                        <span class="w-2 h-2 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                        <span class="w-2 h-2 bg-brand-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                        <span class="w-2 h-2 bg-brand-300 rounded-full animate-bounce"></span>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] animate-pulse">${t('ai_thinking')}</span>
+                </div>
+            `;
+
+            container.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function setInputOptions(options, callbackName) {
+            const container = document.getElementById('chat-options-container');
+            container.innerHTML = '';
+            container.classList.remove('hidden');
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-white border border-slate-200 text-slate-700 py-3 px-6 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-all shadow-sm active:scale-95 whitespace-nowrap';
+                btn.innerText = opt.label;
+                btn.onclick = () => window[callbackName](opt.value, opt.label);
+                container.appendChild(btn);
+            });
+
+            const inputContainer = document.querySelector('.input-container-glass');
+            inputContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideInputOptions() {
+            document.getElementById('chat-options-container').classList.add('hidden');
+        }
+
+        async function handleManualSend() {
+            const val = document.getElementById('chatInput').value;
+            if (!val) return;
+
+            document.getElementById('chatInput').value = '';
+
+            if (state.mode === 'insurance') {
+                await addChatBubble(val, 'user');
+                setTimeout(() => addChatBubble(t('restart_prompt'), 'bot'), 600);
+            }
+        }
+
+        function handleAiManualSend() {
+            const val = document.getElementById('aiChatInput').value;
+            if (!val) return;
+
+            document.getElementById('aiChatInput').value = '';
+
+            if (state.mode === 'ai') {
+                processAIQuery(val);
+            }
+        }
+
+        // --- INSURANCE FLOW ---
+        function startInsuranceFlow() {
+            state.mode = 'insurance';
+
+            // Allow user to see overview first? Or check active?
+            // Let's check active silently.
+            document.getElementById('modal-guidelines').classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeGuidelines() {
+            document.getElementById('modal-guidelines').classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            showView('view-chat-interface');
+            clearChatUI();
+
+            // Check for previous session to resume
+            checkForActiveSession();
+        }
+
+        async function checkForActiveSession() {
+            showTyping();
+
+            try {
+                const res = await apiCall('/insurance/applications/active/');
+
+                // Remove typing indicator once we get a response
+                const typing = document.querySelector('.typing-indicator-box');
+                if (typing) typing.remove();
+
+                if (res.success && res.application) {
+                    console.log("Restoring session:", res.application.id);
+
+                    // 1. Map backend data to frontend state
+                    state.insuranceData = {
+                        ...res.application,
+                        applicationId: res.application.id,
+                        lang: res.application.language,
+                        type: res.application.application_type,
+                        salary: res.application.salary_range,
+                        eid: res.application.emirates_id,
+                        name: res.application.full_name
+                    };
+
+                    // 2. Parse Chat History safely
+                    let history = res.application.chat_history;
+                    if (typeof history === 'string') {
+                        try { history = JSON.parse(history); } catch (e) { history = []; }
+                    }
+                    state.chatHistory = Array.isArray(history) ? history : [];
+
+                    // 3. Render and Resume
+                    if (state.chatHistory.length > 0) {
+                        renderChatHistoryFromState();
+                        // Add a resume greeting ONLY if it wasn't the last message
+                        const lastMsg = state.chatHistory[state.chatHistory.length - 1];
+                        if (!lastMsg.content.includes("Welcome back")) {
+                            addChatBubble(t('welcome_back'), 'bot');
+                        }
+
+                        // Wait a beat before jumping to UI logic to ensure chat is visible
+                        setTimeout(() => resumeFlowLogic(), 500);
+                    } else {
+                        initFlow();
+                    }
+                } else {
+                    // No active session found
+                    initFlow();
+                }
+            } catch (err) {
+                console.error("Session check failed:", err);
+                const typing = document.querySelector('.typing-indicator-box');
+                if (typing) typing.remove();
+                initFlow();
+            }
+        }
+
+        function resumeFlowLogic() {
+            const d = state.insuranceData;
+
+            // 1. Check for Document / Review Status
+            if (d.status === 'Pending OCR' || (d.status === 'In Progress' && d.emirates_id_document)) {
+                // If we have valid issuing place (confirmed) but no salary -> Ask Income
+                if (d.issuingPlace && d.issuingPlace !== 'Pending' && !d.salary_range) {
+                    addChatBubble(t('continue_income'), 'bot');
+                    askIncomeVerification(d.issuingPlace);
+                    return;
+                }
+
+                // Otherwise, show review form (OCR done but not confirmed, or waiting for review)
+                addChatBubble(t('review_details'), 'bot');
+                setTimeout(() => {
+                    document.getElementById('view-review').classList.remove('hidden');
+                    document.body.classList.add('modal-open');
+                    renderReviewForm();
+                }, 1000);
+                return;
+            }
+
+            // 2. If no document, ask for upload (Start of new flow)
+            if (!d.emirates_id_document) {
+                askUpload();
+                return;
+            }
+
+            // 3. Fallback / Completed Steps
+            addChatBubble(t('restart_prompt'), 'bot');
+        }
+
+        async function initFlow() {
+            state.insuranceData = {};
+            state.chatHistory = []; // Reset local history
+
+            showTyping();
+            setTimeout(async () => {
+                await addChatBubble(t('welcome'));
+                showTyping();
+                setTimeout(async () => {
+                    await addChatBubble(t('select_lang'));
+                    setInputOptions([
+                        { label: 'English', value: 'en' },
+                        { label: 'Malayalam', value: 'ml' },
+                        { label: 'Arabic', value: 'ar' },
+                        { label: 'Hindi', value: 'hi' },
+                        { label: 'Urdu', value: 'ur' }
+                    ], 'handleLanguage');
+                }, 800);
+            }, 600);
+        }
+
+        window.handleLanguage = async (val, label) => {
+            await addChatBubble(label, 'user');
+            hideInputOptions();
+            state.insuranceData.lang = val;
+
+            showTyping();
+            setTimeout(async () => {
+                await addChatBubble(t('looking_for_insurance'));
+                setInputOptions([
+                    { label: t('yes_start'), value: 'yes' },
+                    { label: t('no_cancel'), value: 'no' }
+                ], 'handleStartConfirm');
+            }, 1000);
+        };
+
+        window.handleStartConfirm = async (val, label) => {
+            await addChatBubble(label, 'user');
+            hideInputOptions();
+
+            if (val === 'no') {
+                await addChatBubble(t('cancel_msg'), 'bot');
+                setTimeout(() => goToLanding(), 2000);
+                return;
+            }
+
+            showTyping();
+            setTimeout(async () => {
+                await addChatBubble(t('employee_or_dependent'));
+                setInputOptions([
+                    { label: t('employee'), value: 'Employee' },
+                    { label: t('dependent'), value: 'Dependent' }
+                ], 'handleType');
+            }, 1000);
+        }
+
+        window.handleType = async (val, label) => {
+            await addChatBubble(label, 'user');
+            hideInputOptions();
+            state.insuranceData.type = val;
+
+            if (val === 'Employee') {
+                // askIncome(); -> Removed as per new flow
+                createInitialApplication();
+            } else {
+                askDependentType();
+            }
+        }
+
+        function askIncomeVerification(issuingPlace) {
+            const isAbuDhabi = issuingPlace && issuingPlace.toLowerCase().includes('abu dhabi');
+            const txt = t('confirm_income');
+
+            showTyping();
+            setTimeout(() => {
+                addChatBubble(txt);
+
+                let options = [];
+                if (isAbuDhabi) {
+                    options = [
+                        { label: t('above_5000'), value: '>5000' }
+                    ];
+                } else {
+                    // Dubai and others
+                    options = [
+                        { label: t('below_4000'), value: '<4000' },
+                        { label: t('between_4000_5000'), value: '4000-5000' },
+                        { label: t('above_5000'), value: '>5000' }
+                    ];
+                }
+
+                setInputOptions(options, 'handleIncome');
+            }, 1000);
+        }
+
+        function askDependentType() {
+            showTyping();
+            setTimeout(async () => {
+                await addChatBubble(t('dependent_type_q'));
+                setInputOptions([
+                    { label: t('spouse'), value: 'Spouse' },
+                    { label: t('child'), value: 'Child' }
+                ], 'handleDepType');
+            }, 1000);
+        }
+
+        window.handleDepType = async (val, label) => {
+            await addChatBubble(label, 'user');
+            hideInputOptions();
+            state.insuranceData.depType = val;
+            // askIncome(true); -> Removed as per new flow
+            createInitialApplication();
+        }
+
+        window.handleIncome = async (val, label) => {
+            await addChatBubble(label, 'user');
+            hideInputOptions();
+            state.insuranceData.salary = val;
+
+            // Update salary in backend
+            if (state.insuranceData.applicationId) {
+                try {
+                    await apiCall(`/insurance/applications/${state.insuranceData.applicationId}/`, 'PATCH', {
+                        salary_range: val
+                    });
+                } catch (e) { console.error("Failed to update salary", e); }
+            }
+
+            // Proceed to Fine Check
+            startFineCheck();
+        }
+
+        async function createInitialApplication() {
+            showTyping();
+
+            const appData = {
+                language: state.insuranceData.lang,
+                application_type: state.insuranceData.type,
+                dependent_type: state.insuranceData.depType || '',
+                // salary_range: state.insuranceData.salary, -> Can be null now
+                // Partial data - dummy values for required fields that come later
+                emirates_id: 'TEMP-' + Date.now(),
+                full_name: 'Pending Upload',
+                expiry_date: '2099-12-31',
+                nationality: 'Pending',
+                gender: 'Male',
+                issuing_place: 'Pending',
+                mobile_number: '0000000000',
+                status: 'In Progress'
+            };
+
+            if (state.insuranceData.salary) {
+                appData.salary_range = state.insuranceData.salary;
+            }
+
+            const res = await apiCall('/insurance/applications/', 'POST', appData);
+
+            if (res.id) {
+                state.insuranceData.applicationId = res.id;
+                askUpload();
+            } else {
+                console.error("Failed to create app", res);
+                askUpload(); // Continue anyway, will handle error later
+            }
+        }
+
+        function askUpload() {
+            const txt = state.insuranceData.type === 'Dependent' ? t('upload_sponsor') : t('upload_self');
+            // Remove typing from previous step if any
+            const existingTyping = document.querySelector('.typing-indicator-box');
+            if (existingTyping) existingTyping.remove();
+
+            addChatBubble(txt);
+
+            const container = document.getElementById('chat-options-container');
+            container.innerHTML = '';
+            container.classList.remove('hidden');
+
+            const btn = document.createElement('button');
+            btn.className = 'w-full md:w-auto btn-gold text-white py-4 px-8 rounded-full text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95';
+            btn.innerHTML = `<i data-lucide="scan-line" class="w-5 h-5"></i> ${t('btn_upload')}`;
+            btn.onclick = () => simulateUpload(); // Opens file picker
+
+            container.appendChild(btn);
+            lucide.createIcons();
+            document.querySelector('.input-container-glass').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function simulateUpload(type = 'eid') {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*,application/pdf';
+
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                addChatBubble(t('uploading'), 'user');
+                hideInputOptions();
+                showTyping();
+
+                const formData = new FormData();
+                formData.append('document', file);
+                if (state.insuranceData.applicationId) {
+                    formData.append('application_id', state.insuranceData.applicationId);
+                }
+
+                try {
+                    let endpoint = '/insurance/process-ocr/';
+                    if (type === 'passport') endpoint = '/passport/';
+                    if (type === 'visa') endpoint = '/uae-visa/';
+
+                    const res = await apiCall(endpoint, 'POST', formData, true);
+
+                    if (res.success) {
+                        state.insuranceData.uploadType = type;
+
+                        if (type === 'eid') {
+                            state.insuranceData = {
+                                ...state.insuranceData,
+                                ...res.data,
+                                eid: res.data.emirates_id,
+                                name: res.data.full_name,
+                                expiry: res.data.expiry_date,
+                                issuingPlace: res.data.issuing_place
+                            };
+                        } else if (type === 'passport') {
+                            state.insuranceData.passport_no = res.data.passport_number;
+                            state.insuranceData.passport_name = res.data.full_name;
+                            state.insuranceData.passport_expiry = res.data.expiry_date;
+                            state.insuranceData.passport_nationality = res.data.nationality;
+                            state.insuranceData.passport_dob = res.data.dob;
+                        } else if (type === 'visa') {
+                            state.insuranceData.visa_no = res.data.file_number;
+                            state.insuranceData.visa_name = res.data.full_name;
+                            state.insuranceData.visa_eid = res.data.emirates_id_number;
+                            state.insuranceData.visa_passport = res.data.passport_number;
+                        }
+
+                        setTimeout(() => {
+                            document.getElementById('view-review').classList.remove('hidden');
+                            document.body.classList.add('modal-open');
+                            renderReviewForm(type);
+                        }, 500);
+                    } else {
+                        addChatBubble(t('upload_failed'), 'bot');
+                    }
+                } catch (err) {
+                    addChatBubble(t('upload_error'), 'bot');
+                }
+            };
+            input.click();
+        }
+
+        function renderReviewForm(type = 'eid') {
+            const container = document.getElementById('review-form');
+            const data = state.insuranceData;
+
+            document.getElementById('review-modal-subtitle').innerText = t('verification_title');
+            document.getElementById('review-modal-title').innerText = t('review_details_title');
+            document.getElementById('review-modal-badge').innerText = t('extracted_label');
+            document.getElementById('review-modal-notice').innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 flex-none"></i> ${t('verify_notice')}`;
+            document.getElementById('review-modal-confirm').innerText = t('confirm_btn');
+            document.getElementById('review-modal-cancel').innerText = t('close_btn');
+
+            const createField = (key, label, value, type = 'text', readonly = false, required = true) => `
+                <div class="group">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider group-focus-within:text-brand-500 transition-colors">${label} ${required ? '<span class="text-red-500">*</span>' : ''}</label>
+                    <input type="${type}" id="review-${key}" value="${value || ''}" ${readonly ? 'readonly' : ''} ${required ? 'required' : ''}
+                    class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 font-semibold focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 focus:outline-none transition-all ${readonly ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}">
+                </div>
+            `;
+
+            const createSelect = (key, label, currentVal, options) => `
+                 <div class="group">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider group-focus-within:text-brand-500 transition-colors">${label}</label>
+                    <div class="relative">
+                        <select id="review-${key}" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 font-semibold focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 focus:outline-none transition-all appearance-none">
+                            ${options.map(o => `<option value="${o.value}" ${currentVal === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-4 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                    </div>
+                </div>
+            `;
+
+            if (type === 'eid') {
+                const sponsorLabel = state.insuranceData.type === 'Employee' ? 'Employer' : t('sponsor');
+
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" ${isRTL() ? 'dir="rtl"' : ''}>
+                        ${createField('name', t('name'), data.name)}
+                        ${createField('eid', t('eid_no'), data.eid, 'text', true)}
+                        ${createField('date_of_birth', t('dob'), data.date_of_birth, 'date')}
+                        ${createField('nationality', t('nationality'), data.nationality)}
+                        ${createField('issuing_date', t('issuing_date'), data.issuing_date, 'date')}
+                        ${createField('expiry', t('expiry_date'), data.expiry, 'date', true)}
+                        ${createSelect('issuingPlace', t('issuing_place'), data.issuingPlace, [
+                    { label: 'Dubai', value: 'Dubai' },
+                    { label: 'Abu Dhabi', value: 'Abu Dhabi' },
+                    // { label: 'Sharjah', value: 'Sharjah' },
+                    // { label: 'Ajman', value: 'Ajman' },
+                    // { label: 'Fujairah', value: 'Fujairah' },
+                    // { label: 'Ras Al Khaimah', value: 'Ras Al Khaimah' },
+                    // { label: 'Umm Al Quwain', value: 'Umm Al Quwain' }
+                ])}
+                        ${createSelect('gender', t('gender'), data.gender, [
+                    { label: t('male'), value: 'Male' },
+                    { label: t('female'), value: 'Female' }
+                ])}
+                        <div class="md:col-span-2">${createField('occupation', t('occupation'), data.occupation)}</div>
+                        <div class="md:col-span-2">${createField('sponsor_name', sponsorLabel, data.sponsor_name)}</div>
+                        <div class="group md:col-span-2">
+                             <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider group-focus-within:text-brand-500 transition-colors">${t('mobile_number_label')} <span class="text-red-500">*</span></label>
+                             <div class="flex">
+                                <span class="p-3.5 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-sm font-semibold text-slate-500">+971</span>
+                                <input type="tel" id="review-mobile" placeholder="501234567" value="${data.mobile_number || ''}" maxlength="9"
+                                class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-r-xl text-sm text-slate-800 font-semibold focus:border-brand-500 focus:border-l-slate-200 focus:ring-4 focus:ring-brand-500/10 focus:outline-none transition-all"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'passport') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" ${isRTL() ? 'dir="rtl"' : ''}>
+                        ${createField('passport_name', t('name'), data.passport_name)}
+                        ${createField('passport_no', t('passport_no_label'), data.passport_no, 'text', true)}
+                        ${createField('passport_dob', t('dob'), data.passport_dob || data.dob, 'date')}
+                        ${createField('passport_expiry', t('expiry_date'), data.passport_expiry, 'date', true)}
+                        ${createField('passport_nationality', t('nationality'), data.passport_nationality)}
+                    </div>
+                `;
+            } else if (type === 'visa') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" ${isRTL() ? 'dir="rtl"' : ''}>
+                        ${createField('visa_name', t('name'), data.visa_name)}
+                        ${createField('visa_file_no', t('visa_file_no_label'), data.visa_no, 'text', true)}
+                        ${createField('visa_eid', t('eid_no'), data.visa_eid, 'text', true)}
+                        ${createField('visa_passport', t('passport_label'), data.visa_passport, 'text', true)}
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function cancelReview() {
+            document.getElementById('view-review').classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            addChatBubble(t('review_cancelled'), 'bot');
+            const type = state.insuranceData.uploadType || 'eid';
+            if (type === 'eid') askUpload();
+            if (type === 'passport') askPassportUpload();
+            if (type === 'visa') askVisaUpload();
+        }
+
+        async function confirmReview() {
+            const data = state.insuranceData;
+            const type = data.uploadType || 'eid';
+
+            // Helper for validation
+            const validateRequired = (id, label) => {
+                const el = document.getElementById(id);
+                if (!el || !el.value.trim()) {
+                    showAlert('warning', t('missing_info'), `${label} is required`);
+                    if (el) el.focus();
+                    return false;
+                }
+                return true;
+            };
+
+            if (type === 'eid') {
+                if (!validateRequired('review-name', t('name'))) return;
+                if (!validateRequired('review-eid', t('eid_no'))) return;
+                if (!validateRequired('review-date_of_birth', t('dob'))) return;
+                if (!validateRequired('review-nationality', t('nationality'))) return;
+                if (!validateRequired('review-issuing_date', t('issuing_date'))) return;
+                if (!validateRequired('review-expiry', t('expiry_date'))) return;
+                if (!validateRequired('review-occupation', t('occupation'))) return;
+
+                // Sponsor/Employer Label
+                const sponsorLabel = state.insuranceData.type === 'Employee' ? 'Employer' : t('sponsor');
+                if (!validateRequired('review-sponsor_name', sponsorLabel)) return;
+
+                // Mobile Validation
+                const mobileInput = document.getElementById('review-mobile');
+                if (!mobileInput || !mobileInput.value.trim()) {
+                    showAlert('warning', t('missing_info'), t('enter_mobile'));
+                    mobileInput.focus();
+                    return;
+                }
+                if (mobileInput.value.length !== 9) {
+                    showAlert('warning', t('missing_info'), 'Mobile number must be exactly 9 digits (excluding +971)');
+                    mobileInput.focus();
+                    return;
+                }
+
+                data.name = document.getElementById('review-name').value;
+                data.eid = document.getElementById('review-eid').value;
+                data.date_of_birth = document.getElementById('review-date_of_birth').value;
+                data.nationality = document.getElementById('review-nationality').value;
+                data.issuing_date = document.getElementById('review-issuing_date').value;
+                data.expiry = document.getElementById('review-expiry').value;
+                data.issuingPlace = document.getElementById('review-issuingPlace').value;
+                data.gender = document.getElementById('review-gender').value;
+                data.occupation = document.getElementById('review-occupation').value;
+                data.sponsor_name = document.getElementById('review-sponsor_name').value;
+                data.mobile = document.getElementById('review-mobile').value;
+                console.log("eid details are", data)
+
+                if (new Date(data.expiry) < new Date()) {
+                    showAlert('error', t('expired_doc_title'), t('expired_doc_msg'));
+                    return;
+                }
+
+                document.getElementById('view-review').classList.add('hidden');
+                document.body.classList.remove('modal-open');
+
+                if (data.applicationId) {
+                    try {
+                        await apiCall(`/insurance/applications/${data.applicationId}/`, 'PATCH', {
+                            full_name: data.name,
+                            date_of_birth: data.date_of_birth,
+                            issuing_date: data.issuing_date,
+                            expiry_date: data.expiry,
+                            nationality: data.nationality,
+                            issuing_place: data.issuingPlace,
+                            gender: data.gender,
+                            occupation: data.occupation,
+                            sponsor_name: data.sponsor_name,
+                            mobile_number: data.mobile
+                        });
+                    } catch (e) { }
+                }
+                presentConfirmedDataInChat('eid');
+            } else if (type === 'passport') {
+                if (!validateRequired('review-passport_name', t('name'))) return;
+                if (!validateRequired('review-passport_no', t('passport_no_label'))) return;
+                if (!validateRequired('review-passport_dob', t('dob'))) return;
+                if (!validateRequired('review-passport_expiry', t('expiry_date'))) return;
+                if (!validateRequired('review-passport_nationality', t('nationality'))) return;
+
+                data.passport_name = document.getElementById('review-passport_name').value;
+                data.passport_no = document.getElementById('review-passport_no').value;
+                data.passport_dob = document.getElementById('review-passport_dob').value;
+                data.passport_expiry = document.getElementById('review-passport_expiry').value;
+                data.passport_nationality = document.getElementById('review-passport_nationality').value;
+
+                document.getElementById('view-review').classList.add('hidden');
+                document.body.classList.remove('modal-open');
+
+                presentConfirmedDataInChat('passport');
+                setTimeout(() => askVisaUpload(), 1500);
+            } else if (type === 'visa') {
+                if (!validateRequired('review-visa_name', t('name'))) return;
+                if (!validateRequired('review-visa_file_no', t('visa_file_no_label'))) return;
+                if (!validateRequired('review-visa_eid', t('eid_no'))) return;
+                if (!validateRequired('review-visa_passport', t('passport_label'))) return;
+
+                data.visa_name = document.getElementById('review-visa_name').value;
+                data.visa_no = document.getElementById('review-visa_file_no').value;
+                data.visa_eid = document.getElementById('review-visa_eid').value;
+                data.visa_passport = document.getElementById('review-visa_passport').value;
+
+                document.getElementById('view-review').classList.add('hidden');
+                document.body.classList.remove('modal-open');
+
+                presentConfirmedDataInChat('visa');
+                setTimeout(() => finalizeInsurance(data.selectedPlan), 1500);
+            }
+        }
+
+        function presentConfirmedDataInChat(type = 'eid') {
+            const d = state.insuranceData;
+            let title = t('verified_details');
+            let contentHtml = '';
+
+            if (type === 'eid') {
+                contentHtml = `
+                    <div class="flex justify-between"><span>${t('name')}:</span> <span class="font-bold text-slate-800 text-right">${d.name}</span></div>
+                    <div class="flex justify-between"><span>${t('eid')}:</span> <span class="font-mono text-slate-500 text-right">${d.eid}</span></div>
+                    <div class="flex justify-between"><span>${t('dob')}:</span> <span class="text-right">${d.date_of_birth || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('nationality')}:</span> <span class="text-right">${d.nationality || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('gender')}:</span> <span class="text-right">${d.gender || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('issuing_date')}:</span> <span class="text-right">${d.issuing_date || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('expiry_date')}:</span> <span class="text-right">${d.expiry || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('issuing_place')}:</span> <span class="text-right">${d.issuingPlace || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('occupation')}:</span> <span class="text-right truncate max-w-[150px]">${d.occupation || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('sponsor')}:</span> <span class="text-right truncate max-w-[150px]">${d.sponsor_name || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('mobile')}:</span> <span class="text-right">${d.mobile || '-'}</span></div>
+                `;
+            } else if (type === 'passport') {
+                title = t('passport_details_title');
+                contentHtml = `
+                    <div class="flex justify-between"><span>${t('name')}:</span> <span class="font-bold text-slate-800 text-right">${d.passport_name}</span></div>
+                    <div class="flex justify-between"><span>${t('passport_no_label')}:</span> <span class="font-mono text-slate-500 text-right">${d.passport_no}</span></div>
+                    <div class="flex justify-between"><span>${t('dob')}:</span> <span class="text-right">${d.passport_dob || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('expiry_date')}:</span> <span class="text-right">${d.passport_expiry || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('nationality')}:</span> <span class="text-right">${d.passport_nationality || '-'}</span></div>
+                `;
+            } else if (type === 'visa') {
+                title = t('visa_details_title');
+                contentHtml = `
+                    <div class="flex justify-between"><span>${t('name')}:</span> <span class="font-bold text-slate-800 text-right">${d.visa_name}</span></div>
+                    <div class="flex justify-between"><span>${t('visa_file_no_label')}:</span> <span class="font-mono text-slate-500 text-right">${d.visa_no}</span></div>
+                    <div class="flex justify-between"><span>${t('eid_no_label')}:</span> <span class="font-mono text-slate-500 text-right">${d.visa_eid || '-'}</span></div>
+                    <div class="flex justify-between"><span>${t('passport_label')}:</span> <span class="text-right">${d.visa_passport || '-'}</span></div>
+                `;
+            }
+
+            const html = `
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm w-full md:min-w-[300px]" ${isRTL() ? 'dir="rtl"' : ''}>
+                    <div class="flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
+                        <span class="text-xs font-bold text-slate-900 uppercase">${title}</span>
+                    </div>
+                    <div class="space-y-2 text-xs text-slate-600">
+                        ${contentHtml}
+                    </div>
+                </div>
+            `;
+
+            addChatBubble(html, 'bot', true);
+            setTimeout(() => lucide.createIcons(), 100);
+
+            if (type === 'eid') {
+                askIncomeVerification(d.issuingPlace);
+            }
+        }
+
+        function startFineCheck() {
+            showTyping();
+            setTimeout(() => {
+                const title = t('fine_check_btn'); // "Fine Check"
+                const msg = t('fine_check_msg'); // "Before continuing..."
+                const btnText = t('fine_check_btn');
+
+                const cardHtml = `
+                    <div id="fine-check-card" class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[24px] p-6 text-white shadow-lg w-full md:min-w-[320px] fade-in" ${isRTL() ? 'dir="rtl"' : ''}>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                <i data-lucide="file-search" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div class="${isRTL() ? 'text-right' : ''}">
+                                <h3 class="font-bold text-lg">${title}</h3>
+                                <p class="text-xs text-white/80">${msg}</p>
+                            </div>
+                        </div>
+                        <button id="btn-fine-check" onclick="handleFineCheckCardClick()" class="w-full bg-white text-orange-600 font-bold py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+
+                addChatBubble(cardHtml, 'bot', true);
+                setTimeout(() => lucide.createIcons(), 100);
+            }, 800);
+        }
+
+        window.handleFineCheckCardClick = async () => {
+            const btn = document.getElementById('btn-fine-check');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> ${t('checking_fines') || 'Checking...'}`;
+                lucide.createIcons();
+            }
+
+            // Simulate processing
+            setTimeout(() => {
+                if (btn) {
+                    btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> ${t('no_fines_found') || 'Verified'}`;
+                    btn.className = "w-full bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-inner cursor-default";
+                    lucide.createIcons();
+                }
+
+                // Proceed
+                setTimeout(() => {
+                    addChatBubble(t('no_fines_found'), 'bot');
+                    setTimeout(() => startMOHValidation(), 1000);
+                }, 500);
+            }, 2500);
+        }
+
+        // Deprecated old handler, kept if needed or removed
+        window.handleFineCheck = () => { };
+
+        function startMOHValidation() {
+            showTyping();
+            setTimeout(() => {
+                const title = t('moh_validation_btn'); // "MOH Validation"
+                const msg = t('moh_validation_msg');
+                const btnText = t('moh_validation_btn');
+
+                const cardHtml = `
+                    <div id="moh-check-card" class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[24px] p-6 text-white shadow-lg w-full md:min-w-[320px] fade-in" ${isRTL() ? 'dir="rtl"' : ''}>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div class="${isRTL() ? 'text-right' : ''}">
+                                <h3 class="font-bold text-lg">${title}</h3>
+                                <p class="text-xs text-white/80">${msg}</p>
+                            </div>
+                        </div>
+                        <button id="btn-moh-check" onclick="handleMOHCardClick()" class="w-full bg-white text-indigo-600 font-bold py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+
+                addChatBubble(cardHtml, 'bot', true);
+                setTimeout(() => lucide.createIcons(), 100);
+            }, 800);
+        }
+
+        window.handleMOHCardClick = async () => {
+            const btn = document.getElementById('btn-moh-check');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> ${t('validating_moh') || 'Validating...'}`;
+                lucide.createIcons();
+            }
+
+            // Simulate processing
+            setTimeout(() => {
+                if (btn) {
+                    btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> ${t('moh_success') || 'Success'}`;
+                    btn.className = "w-full bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-inner cursor-default";
+                    lucide.createIcons();
+                }
+
+                // Proceed
+                setTimeout(() => {
+                    addChatBubble(t('moh_success'), 'bot');
+                    setTimeout(() => calculateAndShowProducts(), 1000);
+                }, 500);
+            }, 2500);
+        }
+
+        // Deprecated old handler
+        window.handleMOHValidation = () => { };
+
+        async function calculateAndShowProducts() {
+            const place = state.insuranceData.issuingPlace;
+            const salary = state.insuranceData.salary;
+
+            // Backend Call for Recommendations
+            const res = await apiCall('/insurance/recommendations/', 'POST', {
+                salary_range: salary,
+                issuing_place: place
+            });
+
+            if (res.success && res.products.length > 0) {
+                const plans = res.products;
+
+                await addChatBubble(t('found_plans', plans.length), 'bot');
+
+                // Show Products in Chat Stream
+                setTimeout(() => {
+                    const container = document.getElementById('chat-stream');
+                    const cardsContainer = document.createElement('div');
+                    cardsContainer.className = 'flex flex-col md:flex-row gap-4 mt-2 fade-in mb-4 w-full md:w-auto';
+
+                    plans.forEach((plan, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-white border border-slate-200 p-5 rounded-[20px] shadow-sm hover:shadow-md hover:border-brand-500 transition-all cursor-pointer flex-1 md:min-w-[260px] group';
+                        // Map backend fields to frontend logic
+                        const planData = {
+                            name: plan.plan_name,
+                            type: plan.plan_type,
+                            price: plan.premium_amount
+                        };
+                        card.onclick = () => selectProduct(planData);
+
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4" ${isRTL() ? 'dir="rtl"' : ''}>
+                                <div class="${isRTL() ? 'text-right' : ''}">
+                                    <h4 class="font-bold text-lg text-slate-800">${plan.plan_name}</h4>
+                                    <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded mt-1 inline-block group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors">${plan.plan_type}</span>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
+                                    <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-white ${isRTL() ? 'rotate-180' : ''}"></i>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-slate-900 mb-1 ${isRTL() ? 'text-right' : ''}"><span class="text-sm font-medium text-slate-400">AED</span> ${plan.premium_amount}</div>
+                            <div class="text-[10px] text-green-600 font-bold uppercase tracking-wide flex items-center gap-1 ${isRTL() ? 'justify-end' : ''}">
+                                <i data-lucide="check" class="w-3 h-3"></i> ${t('eligible')}
+                            </div>
+                        `;
+                        cardsContainer.appendChild(card);
+                    });
+
+                    container.appendChild(cardsContainer);
+                    lucide.createIcons();
+                    cardsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 800);
+            } else {
+                addChatBubble(t('no_plans'), 'bot');
+                setTimeout(() => {
+                    const btnHtml = `<button onclick="goToLanding()" class="text-xs text-brand-500 font-bold underline">${t('return_dashboard')}</button>`;
+                    addChatBubble(btnHtml, 'bot', true);
+                }, 1000);
+            }
+        }
+
+        // Product Selection Logic
+        async function selectProduct(plan) {
+            await addChatBubble(t('select_plan_msg', plan.name, plan.type), 'user');
+            state.insuranceData.selectedPlan = plan; // Store for later
+            showTyping();
+
+            setTimeout(() => {
+                askMedicalConditions();
+            }, 1000);
+        }
+
+        function askMedicalConditions() {
+            showTyping();
+            setTimeout(() => {
+                addChatBubble(t('medical_q_init'));
+                setInputOptions([
+                    { label: t('yes'), value: 'yes' },
+                    { label: t('no'), value: 'no' }
+                ], 'handleMedicalConditions');
+            }, 800);
+        }
+
+        window.handleMedicalConditions = async (val, label) => {
+            await addChatBubble(label, 'user');
+            hideInputOptions();
+            state.insuranceData.has_medical_conditions = (val === 'yes');
+
+            if (val === 'yes') {
+                startMAFQuestionnaire();
+            } else {
+                askPassportUpload(); // Proceed to passport
+            }
+        }
+
+        let currentMafIndex = 0;
+        let mafResponses = {};
+
+        function updateMafProgress(current, total) {
+            const container = document.getElementById('maf-progress-container');
+            const bar = document.getElementById('maf-progress-bar');
+            const text = document.getElementById('maf-progress-text');
+            const percent = document.getElementById('maf-progress-percent');
+
+            if (!container) return;
+
+            if (current > total) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            // Calculate percentage based on completed questions (current - 1) or current step?
+            // "Question 1 of 9" usually means we are at the beginning.
+            // Let's visualize progress as "How much of the form is done".
+            // At Q1, 0% is done? Or 11% (current step)?
+            // Let's use (current / total) * 100 for a "Step X" visual.
+            const p = Math.round((current / total) * 100);
+            bar.style.width = `${p}%`;
+            text.innerText = t('question_progress', current, total);
+            percent.innerText = `${p}%`;
+        }
+
+        function getMafQuestions() {
+            return [
+                t('maf_q1'),
+                t('maf_q2'),
+                t('maf_q3'),
+                t('maf_q4'),
+                t('maf_q5'),
+                t('maf_q6'),
+                t('maf_q7'),
+                t('maf_q8'),
+                t('maf_q9')
+            ];
+        }
+
+        function startMAFQuestionnaire() {
+            currentMafIndex = 0;
+            mafResponses = {};
+            showTyping();
+
+            const total = getMafQuestions().length;
+            updateMafProgress(1, total);
+
+            setTimeout(() => {
+                addChatBubble(`<b>${t('maf_q_title')}</b><br>${t('maf_q_intro')}`, 'bot', true);
+                askNextMafQuestion();
+            }, 1000);
+        }
+
+        function askNextMafQuestion() {
+            const questions = getMafQuestions();
+            if (currentMafIndex < questions.length) {
+                updateMafProgress(currentMafIndex + 1, questions.length);
+                showTyping();
+                setTimeout(() => {
+                    addChatBubble(`${currentMafIndex + 1}. ${questions[currentMafIndex]}`);
+                    setInputOptions([
+                        { label: t('yes'), value: 'yes' },
+                        { label: t('no'), value: 'no' }
+                    ], 'handleMafAnswer');
+                }, 800);
+            } else {
+                // Done with MAF
+                updateMafProgress(questions.length + 1, questions.length);
+                state.insuranceData.maf_responses = mafResponses;
+                showTyping();
+                setTimeout(() => {
+                    addChatBubble(t('maf_completed'));
+                    setTimeout(() => askPassportUpload(), 1000);
+                }, 1000);
+            }
+        }
+
+        window.handleMafAnswer = async (val, label) => {
+            await addChatBubble(label, 'user');
+            hideInputOptions();
+            mafResponses[`q${currentMafIndex + 1}`] = val;
+            currentMafIndex++;
+            askNextMafQuestion();
+        }
+
+        function askPassportUpload() {
+            showTyping();
+            setTimeout(() => {
+                addChatBubble(t('passport_upload_prompt'), 'bot', true);
+                setInputOptions([
+                    { label: t('btn_upload_passport'), value: 'upload_passport' }
+                ], 'handlePassportUploadBtn');
+            }, 1000);
+        }
+
+        window.handlePassportUploadBtn = () => {
+            simulateUpload('passport');
+        }
+
+        function askVisaUpload() {
+            showTyping();
+            setTimeout(() => {
+                addChatBubble(t('visa_upload_prompt'), 'bot', true);
+                setInputOptions([
+                    { label: t('btn_upload_visa'), value: 'upload_visa' }
+                ], 'handleVisaUploadBtn');
+            }, 1000);
+        }
+
+        window.handleVisaUploadBtn = () => {
+            simulateUpload('visa');
+        }
+
+        async function finalizeInsurance(plan) {
+            // 1. Save Medical Data to Application
+            if (state.insuranceData.applicationId) {
+                try {
+                    await apiCall(`/insurance/applications/${state.insuranceData.applicationId}/`, 'PATCH', {
+                        has_medical_conditions: state.insuranceData.has_medical_conditions,
+                        maf_responses: state.insuranceData.maf_responses
+                    });
+                } catch (e) {
+                    console.error("Failed to save medical data", e);
+                }
+            }
+
+            // 2. Call Backend Create Policy
+            const payload = {
+                application_id: state.insuranceData.applicationId,
+                plan_name: plan.name,
+                plan_type: plan.type,
+                premium_amount: plan.price
+            };
+
+            const res = await apiCall('/insurance/create-policy/', 'POST', payload);
+
+            if (res.success) {
+                const policy = res.policy;
+
+                // Success Card
+                const successHtml = `
+                    <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-[24px] p-6 text-white shadow-lg w-full md:min-w-[320px]" ${isRTL() ? 'dir="rtl"' : ''}>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                <i data-lucide="check" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div class="${isRTL() ? 'text-right' : ''}">
+                                <h3 class="font-bold text-lg">${t('success_title')}</h3>
+                                <p class="text-xs text-white/80">${t('policy_active')}</p>
+                            </div>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm mb-4">
+                            <div class="flex justify-between text-sm mb-1"><span>${policy.plan_name}:</span> <span class="font-mono font-bold">${policy.plan_type}</span></div>
+                            <div class="flex justify-between text-sm"><span>${t('premium')}:</span> <span class="font-bold">AED ${policy.premium_amount}</span></div>
+                        </div>
+                        <button onclick="window.location.href='http://google.com/'" class="w-full bg-white text-emerald-600 font-bold py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-emerald-50 transition-colors">
+                            ${t('continue_btn')}
+                        </button>
+                    </div>
+                `;
+
+                addChatBubble(successHtml, 'bot', true);
+                setTimeout(() => lucide.createIcons(), 100);
+
+                // Refresh policies
+                fetchPolicies();
+            } else {
+                addChatBubble(t('policy_failed') + res.message, 'bot');
+            }
+        }
+
+
+        // --- ASK AI ---
+        function openAskAI() {
+            state.mode = 'ai';
+            showView('view-ai-chat');
+
+            // Set Placeholder
+            document.getElementById('aiChatInput').placeholder = t('ai_placeholder');
+
+            if (state.aiChatHistory.length === 0) {
+                addChatBubble(t('ai_welcome_msg'));
+            } else {
+                renderAiChatHistoryFromState();
+            }
+        }
+
+        function clearAiChatUI() {
+            const stream = document.getElementById('ai-chat-stream');
+            if (stream) stream.innerHTML = '';
+        }
+
+        function renderAiChatHistoryFromState() {
+            const container = document.getElementById('ai-chat-stream');
+            if (!container) return;
+
+            container.innerHTML = '';
+            state.aiChatHistory.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `chat-bubble ${msg.sender === 'user' ? 'chat-user' : 'chat-bot'} fade-in mb-4`;
+                if (isRTL() && msg.sender === 'bot') div.style.direction = 'rtl';
+                if (msg.isHtml) div.innerHTML = msg.content;
+                else div.innerText = msg.content;
+                container.appendChild(div);
+            });
+
+            setTimeout(() => {
+                if (container.lastChild) container.lastChild.scrollIntoView({ behavior: 'smooth' });
+                lucide.createIcons();
+            }, 100);
+        }
+
+        async function processAIQuery(txt) {
+            const container = document.getElementById('ai-chat-stream');
+            await addChatBubble(txt, 'user');
+
+            showTyping();
+
+            const currentLang = state.insuranceData.lang || 'en';
+            const apiKey = 'pk_9YXqUpDSFMMu9eXh';
+
+            // Build Real-time Context
+            const appStatus = state.insuranceData.status || 'Not started';
+            const policyCount = state.policies.length;
+            const userName = state.user ? state.user.full_name : 'Guest';
+
+            const systemPrompt = `You are "Gia", the helpful and concise AI Guide for the Medical Insurance Portal.
+
+                CONTEXT:
+                - User: ${userName}
+                - Status: ${appStatus}
+                - Active Policies: ${policyCount}
+
+                YOUR BEHAVIORAL RULES:
+                1. **GREETING ETIQUETTE (CRITICAL):**
+                - If the user says "Hey", "Hi", "Hello", or "Hy", simply reply with a friendly greeting and ask how you can help. 
+                - **DO NOT** ask for salary or visa location until they specifically ask about insurance plans, prices, or starting an application.
+
+                2. **LANGUAGE ADAPTABILITY:**
+                - You are multilingual. If the user speaks a different language (e.g., Malayalam, Arabic) or asks to switch, **reply in that language immediately**.
+
+                3. **DATA COLLECTION TRIGGER:**
+                - Only ask "Where is your visa issued?" and "What is your salary?" IF the user asks for quotes, prices, or "which plan is for me?".
+
+                4. **PRODUCT LOGIC (STRICT):**
+                - **Dubai Visa:** * Salary < 4000: DHA Basic LSB (864 AED).
+                    * Salary >= 4000: Choice of DHA Basic LSB (864 AED) OR DHA Basic NLSB (1893 AED).
+                - **Abu Dhabi Visa:**
+                    * Salary > 5000: DHA Basic NLSB (1893 AED).
+                    * Salary <= 5000: No products available.
+
+                5. **CONCISENESS:**
+                - Keep replies short. If a user asks a question, answer it directly. Provide buttons only when a transition is natural (e.g., after explaining a process).
+
+                SCOPE & SUPPORT:
+                - **In Scope:** Insurance flows, family/dependent apps (select "Dependent" type), policy status.
+                - **Out of Scope:** Non-insurance topics or technical bugs. 
+                * For these: 📞 800-MED-HELP | 📧 support@medicalportal.ae
+
+                ACTION BUTTONS:
+                - Start App: [[BUTTON:${t('yes_start')}|action:flow]]
+                - Dashboard: [[BUTTON:${t('return_dashboard')}|action:landing]]
+                - Policies: [[BUTTON:${t('user_details_label')}|action:portfolio]]
+            `;
+
+            // Prep messages for Chat Completions (OpenAI style)
+            const messages = [
+                { role: "system", content: systemPrompt }
+            ];
+
+            // Add history (limit to last 10 for context window efficiency)
+            const history = state.aiChatHistory.slice(-10).map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'assistant',
+                content: msg.content
+            }));
+            messages.push(...history);
+
+            try {
+                const response = await fetch(`https://gen.pollinations.ai/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'openai-fast',
+                        messages: messages,
+                        seed: Math.floor(Math.random() * 1000)
+                    })
+                });
+
+                if (!response.ok) throw new Error("API Connection Issue");
+
+                const data = await response.json();
+                const replyText = data.choices[0].message.content;
+
+                // Parse and render
+                const htmlResponse = parseAiResponse(replyText);
+                addChatBubble(htmlResponse, 'bot', true);
+            } catch (error) {
+                console.error("AI Error:", error);
+                const fallback = `I'm currently undergoing maintenance, but I can still help you start your journey: <br><br> [[BUTTON:${t('yes_start')}|action:flow]]`;
+                addChatBubble(parseAiResponse(fallback), 'bot', true);
+            }
+        }
+
+        function parseAiResponse(text) {
+            // Bold markdown
+            let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Bullet points (handle multi-line blocks)
+            const lines = html.split('\n');
+            let result = [];
+            let inList = false;
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                    if (!inList) {
+                        result.push('<ul class="my-2 space-y-1">');
+                        inList = true;
+                    }
+                    result.push(`<li class="ml-4 list-disc text-slate-600 font-medium text-xs md:text-sm">${trimmed.substring(2)}</li>`);
+                } else {
+                    if (inList) {
+                        result.push('</ul>');
+                        inList = false;
+                    }
+                    if (trimmed) result.push(`<div class="mb-1">${line}</div>`);
+                    else result.push('<div class="h-2"></div>'); // Spacer for empty lines
+                }
+            });
+            if (inList) result.push('</ul>');
+
+            html = result.join('');
+
+            // Parse Buttons: [[BUTTON:Label|Action]]
+            html = html.replace(/\[\[BUTTON:(.*?)\|(.*?)\]\]/g, (match, label, action) => {
+                let onclick = '';
+                if (action === 'action:flow') onclick = 'startInsuranceFlow()';
+                else if (action === 'action:landing') onclick = 'goToLanding()';
+                else if (action === 'action:portfolio') onclick = 'showDetails()';
+
+                return `
+                    <button onclick="${onclick}" class="mt-3 w-full bg-brand-500 text-white py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-brand-600 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+                        ${label} <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                `;
+            });
+
+            return html;
+        }
+
+        // --- FETCH POLICIES ---
+        async function fetchPolicies() {
+            const res = await apiCall('/insurance/policies/active/');
+            if (res.success && res.policies) {
+                state.policies = res.policies; // array of policy objects
+            }
+        }
+
+        // --- DETAILS ---
+        function showDetails() {
+            showView('view-details');
+            const list = document.getElementById('policies-list');
+            list.innerHTML = '';
+
+            if (state.policies.length === 0) {
+                document.getElementById('no-policies').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('no-policies').classList.add('hidden');
+            }
+
+            state.policies.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 md:p-8 rounded-[24px] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md hover:border-brand-300 transition-all cursor-pointer group';
+                card.onclick = () => viewPolicyDetails(p.id);
+                card.innerHTML = `
+                    <div class="flex gap-4 items-start">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center flex-none text-blue-600 group-hover:bg-brand-500 group-hover:text-white transition-colors">
+                            <i data-lucide="shield" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-slate-400 font-bold font-mono uppercase tracking-widest mb-1 group-hover:text-brand-500 transition-colors">${p.policy_number}</div>
+                            <h3 class="text-base font-bold text-slate-900">${p.plan_name} <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded ml-2">${p.plan_type}</span></h3>
+                            <p class="text-sm text-slate-500 mt-1 font-medium">Insured: ${p.insured_name}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between md:flex-col md:items-end md:justify-center border-t md:border-0 border-slate-100 pt-4 md:pt-0">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-[10px] font-bold uppercase tracking-wide border border-green-100">
+                            <div class="w-2 h-2 rounded-full bg-green-500"></div> ${p.status}
+                        </div>
+                        <div class="text-xs text-slate-400 mt-0 md:mt-2 font-medium flex items-center gap-2">
+                            <span>${new Date(p.issue_date).toLocaleDateString()}</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:translate-x-1 group-hover:text-brand-500 transition-all"></i>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function viewPolicyDetails(policyId) {
+            const policy = state.policies.find(p => p.id === policyId);
+            if (!policy || !policy.application) return;
+
+            const app = policy.application;
+            const container = document.getElementById('policy-detail-container');
+
+            // Update Titles
+            document.getElementById('policy-detail-subtitle').innerText = t('policy_info_label');
+            document.getElementById('policy-detail-title').innerText = t('user_details_label');
+            document.querySelector('#view-policy-details button[onclick="closePolicyDetails()"]:last-child').innerText = t('close_btn');
+
+            const createField = (label, value) => `
+                <div class="group py-3 border-b border-slate-50 last:border-0">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">${label}</label>
+                    <div class="text-sm text-slate-800 font-semibold">${value || '-'}</div>
+                </div>
+            `;
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2" ${isRTL() ? 'dir="rtl"' : ''}>
+                    
+                    <div class="md:col-span-2 pb-2 mb-2 border-b border-slate-50">
+                        <div class="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Application Type</div>
+                        <div class="text-sm text-slate-800 font-semibold">${app.application_type} ${app.dependent_type ? `(${app.dependent_type})` : ''}</div>
+                    </div>
+
+                    ${createField(t('name'), app.full_name)}
+                    ${createField(t('eid'), app.emirates_id)}
+                    
+                    ${createField(t('dob'), app.date_of_birth)}
+                    ${createField(t('nationality'), app.nationality)}
+                    
+                    ${createField(t('gender'), app.gender)}
+                    ${createField(t('issuing_place'), app.issuing_place)}
+                    
+                    ${createField(t('issuing_date'), app.issuing_date)}
+                    ${createField(t('expiry_date'), app.expiry_date)}
+                    
+                    <div class="md:col-span-2">
+                        ${createField(t('occupation'), app.occupation)}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        ${createField(t('sponsor'), app.sponsor_name)}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        ${createField(t('mobile'), app.mobile_number)}
+                    </div>
+
+                    <!-- Passport Details Section -->
+                    ${app.passport_number ? `
+                    <div class="md:col-span-2 mt-4 pt-2 border-t border-slate-100">
+                        <div class="text-xs font-bold text-slate-900 uppercase mb-2">Passport Details</div>
+                    </div>
+                    ${createField(t('passport_no_label'), app.passport_number)}
+                    ${createField(t('expiry_date'), app.passport_expiry_date)}
+                    ` : ''}
+
+                    <!-- Visa Details Section -->
+                    ${app.visa_number ? `
+                    <div class="md:col-span-2 mt-4 pt-2 border-t border-slate-100">
+                        <div class="text-xs font-bold text-slate-900 uppercase mb-2">Visa Details</div>
+                    </div>
+                    ${createField(t('visa_file_no_label'), app.visa_number)}
+                    ${createField(t('expiry_date'), app.visa_expiry_date)}
+                    ` : ''}
+
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <div class="text-[10px] font-bold text-brand-500 uppercase tracking-[0.2em] mb-4">Official Record</div>
+                    <div class="bg-slate-50 rounded-2xl p-4 flex items-center justify-between border border-slate-100">
+                        <div>
+                            <div class="text-[10px] text-slate-400 font-bold uppercase">Plan Type</div>
+                            <div class="text-sm font-bold text-slate-800">${policy.plan_name} (${policy.plan_type})</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase">Premium Paid</div>
+                            <div class="text-sm font-bold text-brand-600">AED ${policy.premium_amount}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('view-policy-details').classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            lucide.createIcons();
+        }
+
+        function closePolicyDetails() {
+            document.getElementById('view-policy-details').classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        }
+
+        // Check auth on load
+        window.addEventListener('DOMContentLoaded', checkAuth);
+
+        // Removed showView('view-login') here because checkAuth handles it
+    </script>
+</body>
+
+</html>
