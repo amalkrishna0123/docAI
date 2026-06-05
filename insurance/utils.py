@@ -21,7 +21,8 @@ class EmiratesIDExtractor:
             mime_type = "application/pdf" if getattr(document, 'name', '').lower().endswith('.pdf') else "image/jpeg"
             
             # 1. OCR using Google Document AI
-            raw_text = google_document_ai_ocr(file_bytes, mime_type)
+            doc_result = google_document_ai_ocr(file_bytes, mime_type)
+            raw_text = doc_result.text if doc_result else ""
             
             if not raw_text or len(raw_text.strip()) < 10:
                 logger.error("OCR failed or returned minimal text.")
@@ -29,7 +30,7 @@ class EmiratesIDExtractor:
             
             # 2. AI Extraction using Gemini AI
             prompt = build_extraction_prompt(raw_text)
-            ai_result = call_gemini_ai(prompt)
+            ai_result = call_gemini_ai(prompt, file_bytes=file_bytes, mime_type=mime_type)
             
             if "error" in ai_result:
                 return {"error": ai_result["error"]}
@@ -88,9 +89,10 @@ class PassportExtractor(EmiratesIDExtractor):
             file_bytes = document.read()
             mime_type = "application/pdf" if getattr(document, 'name', '').lower().endswith('.pdf') else "image/jpeg"
             
-            raw_text = google_document_ai_ocr(file_bytes, mime_type)
+            doc_result = google_document_ai_ocr(file_bytes, mime_type)
+            raw_text = doc_result.text if doc_result else ""
             prompt = build_extraction_prompt(raw_text)
-            ai_result = call_gemini_ai(prompt)
+            ai_result = call_gemini_ai(prompt, file_bytes=file_bytes, mime_type=mime_type)
             
             if "error" in ai_result:
                 return {"error": ai_result["error"]}
@@ -116,9 +118,10 @@ class VisaExtractor(EmiratesIDExtractor):
             file_bytes = document.read()
             mime_type = "application/pdf" if getattr(document, 'name', '').lower().endswith('.pdf') else "image/jpeg"
             
-            raw_text = google_document_ai_ocr(file_bytes, mime_type)
+            doc_result = google_document_ai_ocr(file_bytes, mime_type)
+            raw_text = doc_result.text if doc_result else ""
             prompt = build_extraction_prompt(raw_text)
-            ai_result = call_gemini_ai(prompt)
+            ai_result = call_gemini_ai(prompt, file_bytes=file_bytes, mime_type=mime_type)
             
             if "error" in ai_result:
                 return {"error": ai_result["error"]}

@@ -310,3 +310,23 @@ class UAEDocumentBusinessLicence(models.Model):
     def __str__(self):
         return f"Business Licence ({self.licence_number or 'N/A'})"
 
+
+class UAEDocumentTOB(models.Model):
+    """
+    Model for Table of Benefits (TOB) document analysis.
+    """
+    document_type = models.CharField(max_length=50, default="TOB")
+    matched_keywords = models.TextField(blank=True, null=True)  # JSON-serialized list
+    signature_present = models.BooleanField(default=False)
+    signature_pages = models.TextField(blank=True, null=True)  # JSON-serialized list
+    signature_locations = models.TextField(blank=True, null=True)  # JSON-serialized list
+    signature_status = models.CharField(max_length=50, blank=True, null=True)
+    validation_status = models.CharField(max_length=50, blank=True, null=True)
+    decline_reason = models.CharField(max_length=255, blank=True, null=True)
+    raw_text = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"TOB Document ({self.validation_status})"
+
+

@@ -34,7 +34,7 @@ def _get_genai_client():
 
 # Prompt Builder
 
-def build_extraction_prompt(ocr_text: str) -> str:
+def build_extraction_prompt(ocr_text: str, requested_doc_type: str = "") -> str:
     """
     Build a structured extraction prompt that instructs the AI to:
       1. Auto-detect the document type from the OCR text.
@@ -48,8 +48,9 @@ def build_extraction_prompt(ocr_text: str) -> str:
 
     # Truncate OCR text to keep the prompt within reasonable token limits.
     # 15,000 chars is usually enough for multi-page Labour Contracts.
-    safe_text = ocr_text[:15000] if len(ocr_text) > 15000 else ocr_text
-    if len(ocr_text) > 15000:
+    MAX_OCR_CHARS = 80000
+    safe_text = ocr_text[:MAX_OCR_CHARS] if len(ocr_text) > MAX_OCR_CHARS else ocr_text
+    if len(ocr_text) > MAX_OCR_CHARS:
         print(f"--- [AI] WARNING: Truncating OCR text from {len(ocr_text)} to 15,000 chars ---")
 
     prompt = f"""
@@ -60,7 +61,9 @@ English, noise, or repeated headers.
 
 Your job:
 1. Identify the document type.
+{f"   - IMPORTANT: The user has specifically requested: '{requested_doc_type}'. Scan for this document type." if requested_doc_type else ""}
 2. Extract required fields.
+   - If multiple documents are present in the text, extract ONLY the details for the requested type.
 3. Return ONLY valid JSON.
 
 Never return explanations, markdown, or comments.
@@ -400,82 +403,53 @@ Prioritize extracting values from structured tables and checkbox lists.
 Do not analyze unrelated sections once the value is found.
 
 ----------------------------------------
-ADVANCED CHECKBOX INTERPRETATION (STRICT - POSITION BASED)
+ADVANCED CHECKBOX INTERPRETATION (STRICT - VISUAL POSITION BASED)
 ----------------------------------------
 
-Medical forms (especially Dubai Insurance) use a two-column checkbox layout for each question.
+Medical forms (especially Dubai Insurance) use a two-column checkbox layout for each medical question.
 
-CRITICAL: DO NOT interpret based only on the symbol type (X, ✓, etc.).
-You MUST determine the answer based on POSITION relative to the boxes.
+CRITICAL: DO NOT interpret based only on the symbol type (X, ✓, /, etc.).
+You MUST determine the answer based ONLY on WHICH CHECKBOX COLUMN contains the mark.
 
-Step-by-step logic:
+Step-by-step Visual Logic:
 
-1. Identify the row for the question.
-2. Identify the pair of checkboxes for that row.
+1. Identify the row for the question visually.
+2. Locate the pair of checkboxes aligned to that row.
 3. Identify the column meaning:
-   - The FIRST box (left) in the pair ALWAYS means "Yes".
-   - The SECOND box (right) in the pair ALWAYS means "No".
-4. Detect ANY mark (tick, cross, slash, pen mark, smudge).
-5. Determine WHICH box contains the mark.
-   - If the mark is in the RIGHT box → the answer is "No".
-   - If the mark is in the LEFT box → the answer is "Yes".
+   - The LEFT checkbox in the pair ALWAYS means "Yes".
+   - The RIGHT checkbox in the pair ALWAYS means "No".
+4. Detect ANY visible mark inside either checkbox (tick, X, slash, pen stroke, scribble, blue/black ink mark, partial mark).
+5. Interpret result:
+   - Mark inside LEFT checkbox => "Yes"
+   - Mark inside RIGHT checkbox => "No"
+6. If BOTH boxes contain marks OR NEITHER box is clearly marked:
+   - Return empty string ""
 
-DUBAI INSURANCE FORM LAYOUT (VERY IMPORTANT):
-- Questions 1 to 11 are in the left half of the page. Their checkboxes are in the middle of the page.
-- Questions 13 to 23 are in the right half of the page. Their checkboxes are on the far right of the page.
-- For EVERY question (1-23), there are exactly TWO boxes.
-- Header: Above the boxes, there is a "Yes / No" header.
-- COLUMN 1 (Leftmost of the pair): This is the YES column.
-- COLUMN 2 (Rightmost of the pair): This is the NO column.
-- RULE: If Box 1 (Left) is marked → "Yes". If Box 2 (Right) is marked → "No".
-- Q21 PATTERN BREAK (CRITICAL): Question 21 ("Are you presently in good health...") is the ONLY question where the healthy answer is "Yes".
-- In many documents, questions 1-20 are marked "No" (Right box), but Question 21 is marked "Yes" (Left box).
-- You MUST check the mark for Q21 independently. Do NOT assume it matches the column of the previous rows.
-- If the mark is in the LEFT box for Q21, the answer is "Yes".
-- If the mark is in the RIGHT box for Q21, the answer is "No".
-- DO NOT default to "No" for this question.
+DUBAI INSURANCE SPECIAL LAYOUT RULE:
+- Questions 1 to 11: Located on the LEFT side of the page; checkboxes are near the page center.
+- Questions 13 to 23: Located on the RIGHT side of the page; checkboxes are near the far-right side.
+- For EVERY medical question row, there are exactly TWO boxes: LEFT=YES, RIGHT=NO.
 
+TEXT OVERRIDE RULE (PRIORITY 1):
+- If handwritten or printed text explicitly says "YES" or "NO" (or "Y"/"N") near the question, ALWAYS prioritize this explicit text over checkbox detection.
+- Example: Handwritten "NO" or circled "NO" overrides any checkbox marks.
 
+HANDWRITTEN MARK RULES:
+- Treat ALL of the following as valid marks: X, ✓, /, diagonal line, scribble, partial mark, small tick.
+- If the mark overlaps mostly inside one checkbox, treat that checkbox as selected.
 
-----------------------------------------
-SPECIAL CASES (VERY IMPORTANT)
-----------------------------------------
+ANTI-ERROR RULES:
+- DO NOT assume X = No.
+- DO NOT assume tick = Yes.
+- DO NOT assume blank = No.
+- DO NOT infer based on question meaning.
+- DO NOT default answers automatically. ONLY use checkbox POSITION.
+- If unsure, return "".
 
-1. PREGNANCY QUESTION:
-   Question: "Are you currently pregnant?"
-
-   - Extract ONLY from the pregnancy section (usually page 4)
-   - DO NOT infer from medical checklist above
-   - If "NO" is explicitly written → return "No"
-   - If "YES" is explicitly written → return "Yes"
-
-3. TEXT OVERRIDE RULE (VERY IMPORTANT):
-   - If text explicitly says "YES" or "NO", that overrides checkbox detection
-
-----------------------------------------
-ANTI-ERROR RULES
-----------------------------------------
-
-- DO NOT assume X = No
-- DO NOT assume blank = No
-- DO NOT use any "defaults" for medical questions. 
-- ALWAYS prioritize the visual mark in the Yes/No column over the question text context.
-- DO NOT mix columns from different rows
-- DO NOT guess
-
-
-----------------------------------------
-FINAL DECISION LOGIC
-----------------------------------------
-
-Return:
-- "Yes" → if mark is in YES column
-- "No" → if mark is in NO column
-- "" → if cannot determine reliably
-
-TEXT PRIORITY RULE:
-If "YES" or "NO" is explicitly written as text near the question,
-ALWAYS use that instead of checkbox detection.
+FINAL DECISION PRIORITY:
+1. Explicit YES/NO text
+2. Left/right checkbox visual position
+3. Otherwise return ""
 
 EXTRACT FIELDS
 
@@ -556,6 +530,78 @@ family_cancer_history (FAMILY HISTORY of Cancer?)
 Always copy the value exactly from the OCR text.
 Do not modify characters.
 Do not replace letters with numbers.
+
+10) Table of Benefits (TOB)
+
+STEP 1: DOCUMENT IDENTIFICATION
+Classify the document as "TOB" ONLY if the document contains one or more of the following keywords, titles, or section headings (case-insensitive, spacing variations allowed):
+
+PRIMARY KEYWORDS:
+- Flexi Health Insurance
+- Schedule of Benefits
+- ESSENTIAL BENEFIT PLAN
+- Table of Benefits
+- Outpatient Treatment
+- Outpatient Benefits
+- Other Additional Benefits
+- Other Benefits
+- Maternity Services
+- Maternity Benefits
+- DOH EXCLUSIONS
+- INDIVIDUAL MEDICAL INSURANCE
+- DHA EXCLUSIONS
+
+DOCUMENT MATCH RULES:
+1. If any of the above keywords appear in the title or section headings, the document should be classified as "TOB".
+2. Accept both Abu Dhabi DoH and Dubai DHA insurance schedules.
+3. Accept minor OCR errors and spacing differences.
+4. If none of the keywords are found, classify as "Unknown".
+5. IMPORTANT: If requested_doc_type is 'TOB', you must ONLY classify the document as 'TOB' or 'Unknown'. Even if it looks like a Passport or Emirates ID, if it does not meet the TOB criteria, classify it as 'Unknown'.
+
+STEP 2: SIGNATURE DETECTION (IMAGE-BASED)
+Use visual analysis of ALL page images, not OCR text alone.
+
+A signature is defined as:
+- Handwritten ink marks
+- Scribbles or cursive strokes
+- Pen-written initials or signatures
+- Usually blue, black, or dark ink
+
+Typical locations:
+- Bottom of the page
+- Top of the page
+- Footer area
+- Header area
+- Any other area on any page
+
+VALID SIGNATURE RULES:
+1. Signature may appear on one or more pages.
+2. Signature can be partial.
+3. Signature can be faint.
+4. Signature may overlap printed content.
+5. Signature may be located anywhere on the page.
+6. Company logos, stamps, printed names, and typed text are NOT signatures.
+
+DECISION RULE:
+- If at least one handwritten signature is detected anywhere in the document:
+  signature_present = true
+  signature_status = "approved"
+- If no handwritten signature is detected:
+  signature_present = false
+  signature_status = "declined"
+
+STEP 3: FINAL VALIDATION
+validation_status:
+- "approved" if:
+    document_type == "TOB"
+    AND signature_present == true
+- "declined" otherwise
+
+decline_reason:
+- "Document is not a TOB" (if document_type != "TOB" and signature_present == true)
+- "Signature not found" (if document_type == "TOB" and signature_present == false)
+- "Document is not a TOB and signature not found" (if document_type != "TOB" and signature_present == false)
+- "" if approved
 
 ----------------------------------------
 TRAVEL / TRANSACTION TABLE EXTRACTION (PASSPORT & EVISA ONLY)
@@ -878,6 +924,34 @@ Business Licence:
   }}
 }}
 
+Table of Benefits (TOB):
+{{
+  "document_type": "TOB",
+  "data": {{
+    "matched_keywords": [],
+    "signature_present": false,
+    "signature_pages": [],
+    "signature_locations": [],
+    "signature_status": "declined",
+    "validation_status": "declined",
+    "decline_reason": ""
+  }}
+}}
+
+Unknown (when TOB is requested but not identified as TOB):
+{{
+  "document_type": "Unknown",
+  "data": {{
+    "matched_keywords": [],
+    "signature_present": false,
+    "signature_pages": [],
+    "signature_locations": [],
+    "signature_status": "declined",
+    "validation_status": "declined",
+    "decline_reason": "Document is not a TOB"
+  }}
+}}
+
 ----------------------------------------
 RULES
 ----------------------------------------
@@ -949,8 +1023,8 @@ def call_gemini_ai(prompt: str, file_bytes: bytes = None, mime_type: str = None,
     log_timing(f"Sending prompt to Gemini (prompt length: {len(prompt)}, has_file: {file_bytes is not None})")
 
     # gemini-1.5-flash is used for maximum stability and document accuracy.
+    # model_id = "gemini-2.5-pro"
     model_id = "gemini-2.5-flash"
-    # model_id = "gemini-1.5-flash"
 
     for attempt in range(retries + 1):
         try:
@@ -968,6 +1042,7 @@ def call_gemini_ai(prompt: str, file_bytes: bytes = None, mime_type: str = None,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     temperature=0.0,
+                    max_output_tokens=65535,
                 ),
             )
             raw_response = response.text
@@ -1074,79 +1149,205 @@ def call_gemini_ai(prompt: str, file_bytes: bytes = None, mime_type: str = None,
 
     return {"error": "Gemini request failed after multiple retries"}
 
+# def _apply_maf_defaults(data: dict) -> dict:
+#     """
+#     Post-processing for Medical Application Forms.
+#     Ensures that medical questionnaire fields are never empty where a default is safe.
+#     Defaults standard medical conditions to 'No' if missing. For 'good_health', we prioritize AI extraction.
+#     """
+#     if not isinstance(data, dict):
+#         return data
+
+#     # Fields that should default to 'No'
+#     no_defaults = [
+#         "insurance_substandard_terms", "insurance_declined", "hazardous_sports",
+#         "infectious_diseases", "cancer", "endocrine_diseases", "blood_disorders",
+#         "mental_disorders", "nervous_system", "cardiovascular", "respiratory",
+#         "digestive_system", "genitourinary", "maternity_history", "musculoskeletal",
+#         "congenital", "perinatal", "injury_poisoning", "previous_hospitalization",
+#         "chronic_disease", "pre_existing_disease", "organ_surgery", "weight_change",
+#         "smoking_alcohol", "bone_fractures", "Shortness_vision", "Hepatitis", "dental_problems", "pregnant", "pregnancy_complications",
+#         "trying_to_conceive", "fertility_treatment", "has_cancer", "family_cancer_history"
+#     ]
+
+#     for field in no_defaults:
+#         val = str(data.get(field, "")).strip().lower()
+#         if "yes" in val:
+#             data[field] = "Yes"
+#         elif "no" in val:
+#             data[field] = "No"
+#         else:
+#             # Preserve AI output (e.g., empty string for unreliability)
+#             # DO NOT default to 'No' if missing or 'none/null'.
+#             data[field] = "" if val in ["", "none", "null", "n/a"] else data.get(field)
+
+#     # Final logical check: If details exist, the checkbox MUST be Yes
+#     # This prevents AI from missing a tick when the user has clearly filled in details.
+#     logic_mapping = {
+#         "dental_problems": "dental_details",
+#         "has_cancer": ["cancer_status", "cancer_diagnosis", "cancer_surgery", "cancer_medication"],
+#         "cancer": ["cancer_status", "cancer_diagnosis", "cancer_surgery", "cancer_medication"],
+#         "hazardous_sports": "hazardous_sports_details",
+#         # REMOVED: "pregnant": "last_menstrual_period" (LMP is collected for all women, not just pregnant ones)
+#     }
+
+#     for checkbox_field, detail_fields in logic_mapping.items():
+#         if isinstance(detail_fields, str):
+#             detail_fields = [detail_fields]
+        
+#         has_details = False
+#         for df in detail_fields:
+#             val = str(data.get(df, "")).strip().lower()
+#             if val and val not in ["", "none", "null", "n/a", "-", "no"]:
+#                 has_details = True
+#                 break
+        
+#         if has_details:
+#             data[checkbox_field] = "Yes"
+
+#     # Specific logic for good_health
+#     gh_val = str(data.get("good_health", "")).strip().lower()
+#     if "no" in gh_val:
+#         data["good_health"] = "No"
+#     elif "yes" in gh_val:
+#         data["good_health"] = "Yes"
+#     else:
+#         # If the AI is completely unsure or returned nothing, 
+#         # we do NOT default to 'No' for this field to avoid false negatives.
+#         # We preserve what the AI returned (which might be empty string).
+#         pass
+
+
+#     return data
+
+def _normalize_yes_no(value):
+    """
+    Normalize checkbox values safely.
+
+    Only explicit Yes/No values are converted.
+    Any unrelated content (dates, names, numbers, punctuation) returns "".
+    """
+    if value is None:
+        return ""
+
+    val = str(value).strip()
+    if not val:
+        return ""
+
+    lower = val.lower()
+
+    # Empty-like values
+    if lower in {"", "none", "null", "n/a", "-", "--"}:
+        return ""
+
+    # Explicit No values
+    if lower in {
+        "no", "n", "false", "unchecked",
+        "not checked", "unselected"
+    }:
+        return "No"
+
+    # Explicit Yes values
+    if lower in {
+        "yes", "y", "true", "checked",
+        "selected", "✓", "✔", "☑", "☒",
+        "x", "✗", "✘"
+    }:
+        return "Yes"
+
+    # Safe partial matches
+    if re.fullmatch(r"\s*(yes)\s*", lower):
+        return "Yes"
+
+    if re.fullmatch(r"\s*(no)\s*", lower):
+        return "No"
+
+    # Do NOT guess based on punctuation.
+    return ""
+
+
 def _apply_maf_defaults(data: dict) -> dict:
-    """
-    Post-processing for Medical Application Forms.
-    Ensures that medical questionnaire fields are never empty where a default is safe.
-    Defaults standard medical conditions to 'No' if missing. For 'good_health', we prioritize AI extraction.
-    """
     if not isinstance(data, dict):
         return data
 
-    # Fields that should default to 'No'
-    no_defaults = [
-        "insurance_substandard_terms", "insurance_declined", "hazardous_sports",
-        "infectious_diseases", "cancer", "endocrine_diseases", "blood_disorders",
-        "mental_disorders", "nervous_system", "cardiovascular", "respiratory",
-        "digestive_system", "genitourinary", "maternity_history", "musculoskeletal",
-        "congenital", "perinatal", "injury_poisoning", "previous_hospitalization",
-        "chronic_disease", "pre_existing_disease", "organ_surgery", "weight_change",
-        "smoking_alcohol", "bone_fractures", "Shortness_vision", "Hepatitis", "dental_problems", "pregnant", "pregnancy_complications",
-        "trying_to_conceive", "fertility_treatment", "has_cancer", "family_cancer_history"
+    yes_no_fields = [
+        "insurance_substandard_terms",
+        "insurance_declined",
+        "hazardous_sports",
+        "infectious_diseases",
+        "cancer",
+        "endocrine_diseases",
+        "blood_disorders",
+        "mental_disorders",
+        "nervous_system",
+        "cardiovascular",
+        "respiratory",
+        "digestive_system",
+        "genitourinary",
+        "maternity_history",
+        "musculoskeletal",
+        "congenital",
+        "perinatal",
+        "injury_poisoning",
+        "previous_hospitalization",
+        "chronic_disease",
+        "pre_existing_disease",
+        "organ_surgery",
+        "good_health",
+        "weight_change",
+        "smoking_alcohol",
+        "bone_fractures",
+        "Shortness_vision",
+        "Hepatitis",
+        "dental_problems",
+        "pregnant",
+        "pregnancy_complications",
+        "trying_to_conceive",
+        "fertility_treatment",
+        "has_cancer",
+        "family_cancer_history",
+        "uae_resident",
+        "already_insured"
     ]
 
-    for field in no_defaults:
-        val = str(data.get(field, "")).strip().lower()
-        if val in ["none", "null", "n/a"]:
-            data[field] = "No"
-        elif val == "":
-            # Preserve empty string if AI returned it (indicates unreliability)
-            # except for standard medical defaults which we'll handle if needed
+    # Ensure all expected fields exist
+    for field in yes_no_fields:
+        if field not in data:
             data[field] = ""
-        elif "yes" in val:
-            data[field] = "Yes"
-        elif "no" in val:
-            data[field] = "No"
-        else:
-            # Preserve AI output if it's something else
-            data[field] = data.get(field)
 
-    # Final logical check: If details exist, the checkbox MUST be Yes
-    # This prevents AI from missing a tick when the user has clearly filled in details.
+    # Normalize all Yes/No fields
+    for field in yes_no_fields:
+        data[field] = _normalize_yes_no(data.get(field))
+
+    # Logical inference from detail fields
     logic_mapping = {
-        "dental_problems": "dental_details",
-        "has_cancer": ["cancer_status", "cancer_diagnosis", "cancer_surgery", "cancer_medication"],
-        "cancer": ["cancer_status", "cancer_diagnosis", "cancer_surgery", "cancer_medication"],
-        "hazardous_sports": "hazardous_sports_details",
-        # REMOVED: "pregnant": "last_menstrual_period" (LMP is collected for all women, not just pregnant ones)
+        "dental_problems": ["dental_details"],
+        "has_cancer": [
+            "cancer_status",
+            "cancer_diagnosis",
+            "cancer_surgery",
+            "cancer_medication"
+        ],
+        "cancer": [
+            "cancer_status",
+            "cancer_diagnosis",
+            "cancer_surgery",
+            "cancer_medication"
+        ],
+        "hazardous_sports": ["hazardous_sports_details"],
     }
 
     for checkbox_field, detail_fields in logic_mapping.items():
-        if isinstance(detail_fields, str):
-            detail_fields = [detail_fields]
-        
         has_details = False
-        for df in detail_fields:
-            val = str(data.get(df, "")).strip().lower()
-            if val and val not in ["", "none", "null", "n/a", "-", "no"]:
+
+        for detail_field in detail_fields:
+            value = str(data.get(detail_field, "")).strip().lower()
+            if value and value not in ["", "none", "null", "n/a", "-", "no"]:
                 has_details = True
                 break
-        
+
         if has_details:
             data[checkbox_field] = "Yes"
-
-    # Specific logic for good_health
-    gh_val = str(data.get("good_health", "")).strip().lower()
-    if "no" in gh_val:
-        data["good_health"] = "No"
-    elif "yes" in gh_val:
-        data["good_health"] = "Yes"
-    else:
-        # If the AI is completely unsure or returned nothing, 
-        # we do NOT default to 'No' for this field to avoid false negatives.
-        # We preserve what the AI returned (which might be empty string).
-        pass
-
 
     return data
 
@@ -1222,6 +1423,8 @@ _MAF_FIELDS = [
     "cancer_radiation_cycles", "cancer_medication", "family_cancer_history"
 ]
 
+_TOB_FIELDS = ["matched_keywords", "signature_present", "signature_pages", "signature_locations", "signature_status", "validation_status", "decline_reason"]
+
 _DOC_TYPE_FIELDS = {
     "Labour Contract": _LABOUR_FIELDS,
     "Passport": _PASSPORT_FIELDS,
@@ -1232,7 +1435,9 @@ _DOC_TYPE_FIELDS = {
     "Medical Application Form": _MAF_FIELDS,
     "COC": _COC_FIELDS,
     "Residence Cancellation": _RESIDENCE_CANCELLATION_FIELDS,
-    "Travel History": _TRAVEL_HISTORY_FIELDS
+    "Travel History": _TRAVEL_HISTORY_FIELDS,
+    "TOB": _TOB_FIELDS,
+    "Unknown": _TOB_FIELDS
 }
 
 def _parse_reasoning_key_values(reasoning: str) -> dict:
@@ -1265,6 +1470,8 @@ def _parse_reasoning_key_values(reasoning: str) -> dict:
         doc_type = "COC"
     elif any(k in lower for k in ["residence cancellation", "cancel date"]):
         doc_type = "Residence Cancellation"
+    elif any(k in lower for k in ["table of benefits", "tob", "schedule of benefits", "essential benefit plan"]):
+        doc_type = "TOB"
     else:
         print("--- [AI] KV-parse: cannot detect document type from reasoning ---")
         return {}

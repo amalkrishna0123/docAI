@@ -6,7 +6,7 @@ from django.conf import settings
 
 PROJECT_ID = "warm-choir-291413"
 LOCATION = "us"
-PROCESSOR_ID = "3ec2438d05c1ce38"
+PROCESSOR_ID = "3ec2438d05c1ce38" 
 
 # Explicitly set credentials path
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "google-key.json")
@@ -58,7 +58,7 @@ def google_document_ai_ocr(file_bytes, mime_type):
         duration = (end - start).total_seconds()
         
         log_timing(f"OCR process_document finished in {duration:.2f}s")
-        return result.document.text
+        return result.document
     except Exception as e:
         log_timing(f"Google Document AI error: {e}")
-        return ""
+        return None

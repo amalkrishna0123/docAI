@@ -19,14 +19,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-_hf(!fmr__+k%r)&1w7r))g5d(_#f(v$)jw!!#rprlm*+_lbpx')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = False
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 ALLOWED_HOSTS = [
+    "172.31.2.135",
     "localhost",
     "127.0.0.1",
-    "docai.chinjustore.in",
-    "docai.keralahome.in"
+    "uatiep.dubins.ae",
+    "*"
 ]
 
 # Application definition
@@ -39,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Third party apps
+    # 
     'rest_framework',
     'corsheaders',
     
@@ -213,6 +214,8 @@ SIMPLE_JWT = {
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
+    "http://172.31.2.135",
+    "https://uatiep.dubins.ae",
     "https://keralahome.in",
     "https://docai.keralahome.in",
     "https://uatb2ciep.dubins.ae",
@@ -229,6 +232,8 @@ CORS_ALLOW_CREDENTIALS = False
 
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
+    "http://172.31.2.135",
+    "https://uatiep.dubins.ae",
     "https://keralahome.in",
     "https://docai.keralahome.in",
     "https://uatb2ciep.dubins.ae",

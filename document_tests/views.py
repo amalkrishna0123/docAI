@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from django.http import JsonResponse
 from django.conf import settings
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -8,7 +9,7 @@ from .models import (
     UAEDocumentPassport, UAEDocumentEmiratesID, UAEDocumentVisa, 
     UAELabourContract, UAEMedicalApplicationForm, UAEDocumentCOC, 
     UAEDocumentResidenceCancellation, UAEDocumentTravelHistory,
-    UAEDocumentBusinessLicence
+    UAEDocumentBusinessLicence, UAEDocumentTOB
 )
 from .ai_extractor import build_extraction_prompt, call_gemini_ai
 
@@ -52,7 +53,8 @@ def upload_document(request):
         # ── Step 2: Google Document AI OCR ─────────────────────────────────
         start_ocr = datetime.now()
         log_timing("Sending to Google Document AI...")
-        raw_text = google_document_ai_ocr(file_bytes, mime_type)
+        doc_result = google_document_ai_ocr(file_bytes, mime_type)
+        raw_text = doc_result.text if doc_result else ""
         end_ocr = datetime.now()
         ocr_duration = (end_ocr - start_ocr).total_seconds()
         log_timing(f"OCR finished in {ocr_duration:.2f}s. Text length: {len(raw_text or '')} chars")
@@ -63,9 +65,10 @@ def upload_document(request):
                 status=422,
             )
 
-        # ── Step 3: Build prompt & call Pollinations AI ─────────────────────
+        # ── Step 3: Build prompt & call Gemini AI ─────────────────────
         log_timing("Building AI extraction prompt...")
-        prompt = build_extraction_prompt(raw_text)
+        requested_doc_type = request.headers.get("X-Selected-Doc-Type", "")
+        prompt = build_extraction_prompt(raw_text, requested_doc_type=requested_doc_type)
 
         start_ai = datetime.now()
         log_timing("Calling Gemini AI...")
@@ -84,6 +87,39 @@ def upload_document(request):
         fields = ai_result.get("data", {})
         print(f"--- [UPLOAD] AI detected document type: {document_type} ---")
         print(f"--- [UPLOAD] Extracted fields: {fields} ---")
+
+        is_tob_context = (requested_doc_type == "TOB" or document_type == "TOB")
+
+        if is_tob_context:
+            doc_type_stored = "TOB" if document_type == "TOB" else "Unknown"
+            keywords = fields.get("matched_keywords", [])
+            sig_pages = fields.get("signature_pages", [])
+            sig_locs = fields.get("signature_locations", [])
+            
+            record = UAEDocumentTOB.objects.create(
+                document_type=doc_type_stored,
+                matched_keywords=json.dumps(keywords) if isinstance(keywords, list) else str(keywords),
+                signature_present=fields.get("signature_present", False),
+                signature_pages=json.dumps(sig_pages) if isinstance(sig_pages, list) else str(sig_pages),
+                signature_locations=json.dumps(sig_locs) if isinstance(sig_locs, list) else str(sig_locs),
+                signature_status=fields.get("signature_status", "declined"),
+                validation_status=fields.get("validation_status", "declined"),
+                decline_reason=fields.get("decline_reason", "Document is not a TOB" if doc_type_stored == "Unknown" else ""),
+                raw_text=raw_text
+            )
+            print(f"--- [UPLOAD] Saved TOB record ID: {record.id} ---")
+            
+            response_data = {
+                "document_type": doc_type_stored,
+                "matched_keywords": keywords,
+                "signature_present": fields.get("signature_present", False),
+                "signature_pages": sig_pages,
+                "signature_locations": sig_locs,
+                "signature_status": fields.get("signature_status", "declined"),
+                "validation_status": fields.get("validation_status", "declined"),
+                "decline_reason": fields.get("decline_reason", "Document is not a TOB" if doc_type_stored == "Unknown" else "")
+            }
+            return JsonResponse(response_data, status=200)
 
         # ── Step 4: Save to the correct model ──────────────────────────────
         record_id = None
